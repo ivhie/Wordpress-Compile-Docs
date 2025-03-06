@@ -1,3 +1,121 @@
+/* AJAX Script */
+   //get admin ajax url from this variable
+    //var ajax_url = ctPublicFunctions['_ajax_url'];
+
+    // onchange select option category
+    jQuery('#category-search-form select').on('change', function() {
+
+
+        var cat_id = this.value // get option value
+        var paged =  1; 
+        var posts_per_page = jQuery('#listing_news_wrapp').attr('posts_per_page'); 
+        var tot_number_post = 0;
+       
+        //get post count
+        jQuery.ajax({
+            url: admin_ajax_object.ajax_url, // I add this tru localize
+            type: 'POST',
+            //dataType: "json",
+            data: {
+                action : 'getNewsCountByCatID',
+                cat_id: cat_id,
+            },
+            success: function(data) {
+
+                const obj = JSON.parse(data);
+                console.log(obj.found_posts);
+                tot_number_post = obj.found_posts; // set total number of posts
+               
+                  
+            }
+        });   
+
+        
+        jQuery.ajax({
+                url: admin_ajax_object.ajax_url, // I add this tru localize
+                type: 'POST',
+                dataType: 'html',
+                data: {
+                    action : 'news_load_more_content',
+                    paged: paged,
+                    posts_per_page: posts_per_page,
+                    cat_id: cat_id,
+                },
+                beforeSend : function ( xhr ) {
+                
+                },
+                success: function(data) {
+                        // append html new wrap
+                        
+                        const obj = JSON.parse(data);
+                        console.log(obj.num_post);
+                        //alert(posts_per_page);
+                        jQuery("div.listing_news_wrapp").html(obj.html);
+                        //check if total number of post is lesser than current post display
+                        count_post_displayed =  parseInt(posts_per_page) *  paged;
+                        //alert(tot_number_post);
+                        //alert(count_post_displayed);
+                        if(  parseInt(tot_number_post) < count_post_displayed ){ 
+                            jQuery('#loadmore').css('display','none') //hide load more button;
+                        } else {
+                            jQuery('#loadmore').css('display','inline') //show load more button;
+                            jQuery('#loadmore').attr(  'page', paged ); // set page always to default 1
+                            jQuery('#loadmore').attr(  'tot_number_post', tot_number_post ); // set total number of post
+                        }
+                      
+                }
+
+                //jQuery('#loadmore').attr(  'page', paged );
+        });   
+
+
+    });
+
+
+    // onclick readmore button script
+    jQuery("#loadmore").on("click", function(e) {
+  
+            e.preventDefault();
+            var btn = jQuery(this);
+            btn.text( 'Loading...' ); // change the button text, you can also add a preloader image
+            var paged = parseInt(btn.attr('page')) + 1; 
+            var posts_per_page = jQuery('#listing_news_wrapp').attr('posts_per_page'); 
+            var tot_number_post = btn.attr('tot_number_post')
+            
+            jQuery.ajax({
+                url: admin_ajax_object.ajax_url, // I add this tru localize
+                type: 'POST',
+                dataType: 'html',
+                data: {
+                    action : 'news_load_more_content',
+                    paged: paged,
+                    posts_per_page: posts_per_page
+                },
+                beforeSend : function ( xhr ) {
+                
+                },
+                success: function(data) {
+                        // append html new wrap
+                        const obj = JSON.parse(data);
+                        jQuery("div.listing_news_wrapp").append(obj.html);
+                        btn.text('Load More')
+                        //check if total number of post is lesser than current post display
+                        count_post_displayed =  parseInt(posts_per_page) *  paged;
+                        if(  parseInt(tot_number_post) < count_post_displayed ){ 
+                            btn.css('display','none') //remove load more button;
+                        }
+                        btn.attr(  'page', paged );
+                }
+            });   
+
+    });
+
+    
+
+});
+
+/* AJAX Script */
+
 
 add_action( 'wp_enqueue_scripts', 'child_register_js');
 /**
