@@ -1,3 +1,4 @@
+//$post->post_date - Date parameter
 function getNewsDateFormat($data) {
     // Febraury 25, 2025 format
     $getdate = explode(' ', $data);
