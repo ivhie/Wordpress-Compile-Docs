@@ -215,8 +215,9 @@ function alllatest_listing_blogs($atts){
 }
 
 // ajax loadmore content
-add_action( 'wp_ajax_nopriv_news_load_more_content', 'news_load_more_content' );
-add_action( 'wp_ajax_filter_news_load_more_content', 'news_load_more_content' );
+add_action( 'wp_ajax_nopriv_news_load_more_content', 'news_load_more_content' ); // for logout user only
+add_action( 'wp_ajax_news_load_more_content', 'news_load_more_content' );
+//add_action( 'wp_ajax_filter_news_load_more_content', 'news_load_more_content' );
 function news_load_more_content(){ 
     
     $paged = isset($_POST['paged'])?$_POST['paged'] : 1;
@@ -265,8 +266,9 @@ function news_load_more_content(){
 }
 
 // get post count by category
-add_action( 'wp_ajax_nopriv_getNewsCountByCatID', 'getNewsCountByCatID' );
-add_action( 'wp_ajax_filter_getNewsCountByCatID', 'getNewsCountByCatID' );
+add_action( 'wp_ajax_nopriv_getNewsCountByCatID', 'getNewsCountByCatID' ); // for logout use only
+add_action( 'wp_ajax_getNewsCountByCatID', 'getNewsCountByCatID' ); // for login user
+//add_action( 'wp_ajax_filter_getNewsCountByCatID', 'getNewsCountByCatID' );
 function getNewsCountByCatID(){
    
     $cat_id = isset($_POST['cat_id'])?$_POST['cat_id'] : 0;
