@@ -3,7 +3,7 @@ First install : Seraphinite Accelerator (Base, cache only)
 Second : Download the extend and install - "Seraphinite Accelerator (Extended, limited)"
 Third : Deactivate the old plugin
 
-Add this script on footer
+Add this script on footer to hide the water mark
 <script> 
 	document.addEventListener("DOMContentLoaded", function() { 
 		var enlacesConImagen = document.querySelectorAll('a img\[alt="Seraphinite Accelerator"\]'); 
