@@ -758,3 +758,293 @@ function eventPopupHtml() {
 	//https://www.cahf.org/cvweb/cgi-bin/Eventsdll.dll/EventInfo?sessionaltcd=WEBINAR050825
 	return $html;
 }
+
+/* STYLE */
+						
+
+/*Event Calendar Style*/
+#calendar {
+	width: 100%;
+	max-width: 1800px;
+	margin: 30px auto 50px;
+	font-family: "Helvetica Neue", Helvetica, -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif;
+}
+
+#calendar a {
+	color: #666;
+	text-decoration: none;
+}
+#calendar ul {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	clear: both;
+	width: 100%;
+}
+#calendar li {
+	display: block;
+	float: left;
+	width: 14.2857142857%;
+	padding: 5px;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	border: 1px solid #ccc;
+	margin-right: -1px;
+	margin-bottom: -1px;
+}
+#calendar .weekdays {
+	height: 40px;
+	width: 99.6%;
+}
+#calendar .weekdays li {
+	text-align: left;
+	line-height: 20px;
+	border: none !important;
+	padding: 10px 0px;
+	color: #5d5d5d;
+	font-size: 0.9em;
+}
+
+#calendar .days li {
+	height: 12em;
+}
+
+#calendar .days li:hover {
+	background-color: #eee;
+}
+
+#calendar .date {
+	text-align: left;
+	width:100%;
+	margin-bottom: 0px;
+	padding: 0px 5px 5px;
+	color: #141827;
+	display:block;
+	font-size:24px;
+	font-weight:700;
+}
+#calendar .date.lapse{
+    color: #72747d
+}
+
+#calendar .other-month .date  {
+	display: none;
+}
+#calendar .date_text { display:block;width:100%;}
+#calendar .date_text span.title {
+	color: #337CC3;
+    font-size: 16px;
+    font-weight: 600;
+    display: block;
+    line-height: 20px;
+	margin-bottom: 4px;
+    font-family: "Open Sans", Sans-serif;
+}
+
+#calendar .date_text span.desc {
+	color: #000;
+    font-size: 14px;
+    font-weight: 400;
+    display: block;
+    line-height: 18px;
+    font-family: "Open Sans", Sans-serif;
+
+}
+
+
+#calendar .event {
+	clear: both;
+	display: block;
+	font-size: 0.9em;
+	border-radius: 4px;
+	-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
+	padding: 5px;
+	margin-top: 40px;
+	margin-bottom: 5px;
+	color: #009aaf;
+	line-height: 1.2em;
+	background-color: #e4f2f2;
+	border: 1px solid #b5dbdc;
+	text-decoration: none;
+}
+
+#calendar .event:hover {
+	background-color: #BAEFEF;
+	cursor: pointer;
+}
+
+#calendar .event-desc {
+	color: #666;
+	margin: 3px 0 7px 0;
+	text-decoration: none;
+}
+
+
+
+
+
+.event_form_wrap { 
+    display:flex;
+    border:1px solid #e4e4e4;
+    justify-content:flex-start;
+    padding: 10px 40px;
+ }
+.s_event_name_wrapp { width: 30%; position:relative;}
+.s_event_name_wrapp .s-input { 
+    width: 100%; 
+    border:0px; 
+    outline: 0px; 
+    font-size:14px;
+    padding: 12px 10px;
+}
+.s_event_name_wrapp svg { 
+    position:absolute;
+    left:0px;
+    height: 16px;
+    width: 16px;
+    left: -20px;
+    top: 28%;
+}
+
+.event_form_wrap .spacer { width: 2px; border-right:1px solid  #e4e4e4;   height: 38px; }
+
+
+.s_event_location_wrapp { width: 30%; position:relative;}
+.s_event_location_wrapp .s-input { 
+    width: 100%; 
+    border:0px; 
+    outline: 0px; 
+    font-size:14px;
+    padding: 12px 10px;
+}
+
+.s_event_location_wrapp svg { 
+    position:absolute;
+    left:0px;
+    height: 16px;
+    width: 16px;
+    left: -20px;
+    top: 28%;
+}
+.s_btn_wrap { margin-right:10px;}
+.s_btn_wrap  .s-event-submit {
+    border: #000000 solid 2px;
+    border-radius: 5px;
+    background-color: #fff;
+    color: #000000;
+    font-weight: bold;
+    padding: 11px 20px;
+    text-align:center;
+    cursor:pointer;
+}
+
+.s_list_wrap { width:120px; height: 42px; overflow-y:hidden;}
+.s_list_wrap ul {
+    margin: 0px 0;
+    padding: 0;
+    list-style: none;
+    position: absolute;
+    background-color:#fff;
+    padding: 6px 25px;
+	border: 1px solid #fff; 
+    
+ }
+ .s_list_wrap ul:hover { border: 1px solid #e4e4e4; }
+ .s_list_wrap ul:hover li { display:block !important; }
+.s_list_wrap li { width : 85px; text-align:left; margin-bottom:10px; position:relative;}
+.s_list_wrap li.calendar { display:none;}
+.s_list_wrap:hover li.calendar  { display:block;}
+.s_list_wrap li a { text-decoration:none; color:#141827; }
+.s_list_wrap li a:hover {  color:#0C5398; }
+.s_list_wrap li.list svg { 
+    position: absolute;
+    height: 12px;
+    width: 12px;
+    right: 0px;
+    top: 18%;
+}
+
+.navigation_date_wrapp { display:flex; justify-content: flex-start; margin-top: 40px;}
+.navigation_date_wrapp .arrow_nav { display:flex; column-gap: 0px;}
+.navigation_date_wrapp .arrow_nav a { outline:none; }
+.navigation_date_wrapp .arrow_nav a svg {
+    stroke: #444;
+}
+.navigation_date_wrapp .today {
+    display: block;
+    align-items: center;
+    align-content: center;
+}
+.navigation_date_wrapp .today span { 
+	border: 1px solid #e4e4e4;
+    /* color: #e4e4e4; */
+    padding: 3px 16px 5px;
+    display: block;
+    border-radius: 3px;
+    font-size: 16px;
+    line-height: 16px;
+ }
+
+ .navigation_date_wrapp .today span a { color:#000; text-decoration:none;}
+
+
+ .navigation_date_wrapp .year {
+    display: block;
+    align-items: center;
+    align-content: center;
+}
+.navigation_date_wrapp .year span { 
+	
+    font-size: 24px;
+	font-weight:600;
+	color:#000;
+    font-family: "Open Sans", Sans-serif;;
+ }
+
+
+
+.event_selected_date { display:flex;  align-items: center; margin-bottom:50px; margin-top:60px;}
+.event_selected_date h3 {
+	font-family: "Open Sans", Sans-serif;
+	font-weight: 700;
+	font-size: 24px;
+	line-height: 100%;
+	color:#000;
+	margin: 0;
+	width: 170px;
+}
+
+.event_selected_date .bar { width: 100%; height:2px; border-bottom:1px solid #000;}
+
+/* POP UP EVENT CONTENT*/
+#calendar-e-popup {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(0,0,0,0.5);
+	display: none;
+	z-index: 9999;
+  }
+  
+  .e-popup-content {
+	background-color: #fff;
+	padding: 20px;
+	margin: 3% auto;
+	width: 90%;
+	border-radius: 8px;
+	position: relative;
+  }
+  .ev_iframe_content { overflow-x: auto; height:570px;}
+  
+  .e-close-popup {
+	position: absolute;
+	top: 5px;
+	right: 10px;
+	cursor: pointer;
+	font-size: 20px;
+  }
+
