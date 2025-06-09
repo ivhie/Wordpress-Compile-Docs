@@ -1,0 +1,137 @@
+// display featured case study image content
+add_shortcode('project-grid', 'project_grid');
+function project_grid($atts){ 
+
+   	 ob_start();
+
+	$atts = shortcode_atts(array(
+		'category_slug' => '',
+	), $atts, 'project-grid');
+
+
+	// The Query
+	if($atts['category_slug']){
+       
+		$args = array(
+			'post_type' => 'project',
+			'post_status' => 'publish',
+			'posts_per_page'=>-1,
+			'order'=>'DESC',
+			'tax_query' => array(
+				array(
+					'taxonomy' => 'project-type',
+					'field'    => 'slug',
+					'terms'    =>  esc_html($atts['category_slug']),
+				),
+			),
+		);
+
+		
+	} else {
+
+          $args = array(
+			'post_type' => 'project',
+			'post_status' => 'publish',
+			'posts_per_page'=>-1,
+			'order'=>'DESC',
+		);
+
+	}
+
+    $the_query = new WP_Query( $args );
+    $projects = $the_query->posts;
+
+    $html .= '<div class="project_wrapper">';
+	if($projects){
+       foreach( $projects as $project ){
+
+		   $url = get_the_post_thumbnail_url( $project->ID , 'post-thumbnail' );
+		   $html .= '<div class="project_card" style="background-image:url('.$url.');">';
+		         $html .= '<div class="card_box">';     
+					$html .= '<h3 class="post-title">'.$project->post_title.'</h3>';
+					$html .= '<a href="'.get_permalink($project->ID).'" class="view_more"/>View Project <img src="/wp-content/uploads/2025/06/Vector-2.png" alt=""/></a>';
+				 $html .= '</div>';     
+           $html .= '</div>';     
+	   }
+
+	}
+	$html .= '</div>';
+   
+   ob_end_clean(); // avoid buffering
+	return $html;
+
+}
+
+<style>
+
+.project_wrapper { 
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+.project_wrapper .project_card {
+    flex: 0 0 48%; /* Each item takes 50% of the container */
+    padding: 10px;
+    box-sizing: border-box;
+    background-repeat:no-repeat;
+    background-size:cover;
+    margin-bottom:4%;
+    height:380px;
+    position:relative;
+    box-shadow: 0px 4px 4px 0px #00000040;
+}
+.project_wrapper .project_card .card_box {
+
+    background-color:#0000009c;
+    display:block;
+    width:100%;
+    max-width:360px;
+    padding:30px 20px 25px;
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+
+}
+.project_wrapper .project_card .card_box .post-title { 
+    display:block; 
+    color:#fff;
+    font-size:24px;
+    font-weight:700;
+    margin: 0 0 10px 0;
+    line-height: 30px;
+
+}
+.project_wrapper .project_card .card_box a.view_more { 
+    color:#fff; 
+    font-size:16px; 
+    font-weight:normal; 
+    position:relative;
+    font-family: Roboto;
+    font-weight: 300;
+    display:block;
+    height:30px;
+    max-width: 120px;
+  
+}
+
+.project_wrapper .project_card .card_box a  img { 
+    position:absolute;
+    right:0;
+    top: 4px;
+ }
+
+.project_wrapper .project_card:after {
+    background-color:#ffffff61;
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    content: " ";
+    opacity:1;
+
+}
+
+
+
+</style>
