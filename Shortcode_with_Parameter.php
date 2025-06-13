@@ -1,3 +1,6 @@
+
+
+/* Shortcode parameter tag should be lower case to make it work*/
 function my_custom_shortcode($atts) {
     // Set default values and extract shortcode attributes
     $atts = shortcode_atts(array(
