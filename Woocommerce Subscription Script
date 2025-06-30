@@ -1,0 +1,1084 @@
+/* Hide Wordpress Notification Message On Corporate Members Custom Page */
+add_action('admin_head', 'hide_admin_notices_on_corporate_member_page');
+
+function hide_admin_notices_on_corporate_member_page() {
+    $screen = get_current_screen();
+    //var_dump($screen);
+    // Replace 'toplevel_page_my_custom_page' with your actual menu slug
+    if ($screen && $screen->id === 'toplevel_page_corporate-members') {
+        remove_all_actions('admin_notices');
+        remove_all_actions('all_admin_notices');
+    }
+    if ($screen && $screen->id === 'corporate-members_page_corporate-members-settings') {
+        remove_all_actions('admin_notices');
+        remove_all_actions('all_admin_notices');
+    }
+	if ($screen && $screen->id === 'corporate-members_page_corporate-members-expired-testing') {
+        remove_all_actions('admin_notices');
+        remove_all_actions('all_admin_notices');
+    }
+
+}
+
+/* This will display on backend */
+add_action('admin_menu', 'corporate_members_details',10);
+
+function corporate_members_details() {
+    add_menu_page(
+        'Corporate Members',         // Page title
+        'Corporate Members',            // Menu title
+        'manage_options',         // Capability
+        'corporate-members',         // Menu slug
+        'corporate_members_dashboard',// Callback function
+        'dashicons-admin-generic',// Icon
+        6                         // Position
+    );
+}
+
+/* Add submenu on corporate members page */
+add_action('admin_menu', 'corporate_members_settings_page');
+function corporate_members_settings_page() {
+    add_submenu_page(
+        'corporate-members',            // Parent slug (Settings menu)
+        'Corporate Settings',             // Page title
+        'Settings',                    // Menu title
+        'manage_options',                 // Capability
+        'corporate-members-settings',             // Menu slug
+        'corporate_members_settings_content'         // Callback function
+    );
+
+	add_submenu_page(
+        'corporate-members',            // Parent slug (Settings menu)
+        'Expired Testing',             // Page title
+        'Expired Testing',                    // Menu title
+        'manage_options',                 // Capability
+        'corporate-members-expired-testing',             // Menu slug
+        'corporate_members_expired_testing'         // Callback function
+    );
+}
+//settings
+function corporate_members_settings_content() { 
+		//echo '<h3>Settings</h3>';
+		?>
+        <form method="post" action="options.php">
+            <?php
+            settings_fields('corporate_settings_group');
+		    //settings_fields('corporate_settings_group_testing_area');
+            do_settings_sections('corporate-settings');
+            submit_button();
+            ?>
+        </form>
+	<?php
+}
+//expire testing
+function corporate_members_expired_testing() { 
+		//echo '<h3>Settings</h3>';
+		?>
+        <form method="post" action="options.php">
+            <?php
+            settings_fields('corporate_expire_testing_group');
+            do_settings_sections('corporate-member-expire-testing');
+            submit_button();
+            ?>
+			
+        </form>
+	<?php
+}
+
+// 3. Register product setting fields
+add_action('admin_init', function() {
+	 // Register options corporate settings
+    register_setting('corporate_settings_group', 'corporate_subscription_product_id');
+	register_setting('corporate_settings_group', 'corporate_limit_members_entry');
+
+	// Register options corporate expiring testing
+	register_setting('corporate_expire_testing_group', 'corporate_subscription_dropdown_user_id');
+	register_setting('corporate_expire_testing_group', 'corporate_subscription_enable_test');
+
+	add_settings_section(
+        'corporate_settings_section',
+        'Settings',
+        null,
+        'corporate-settings'
+    );
+
+	add_settings_section(
+        'corporate_expired_test_section',
+        'Set subscription as expired',
+        null,
+        'corporate-member-expire-testing'
+    );
+    
+	 add_settings_field(
+        'corporate_limit_members_entry',
+        'Enter Max Entry Members',
+        function() {
+            $limit_entry = get_option('corporate_limit_members_entry');
+			$limit_entry = ($limit_entry != '')?$limit_entry:1;
+            echo '<input type="text" name="corporate_limit_members_entry" placeholder="If not set, default value is 1" value="' . esc_attr($limit_entry) . '" />';
+        },
+        'corporate-settings',
+        'corporate_settings_section'
+    );
+	
+    add_settings_field(
+        'corporate_subscription_product_id',
+        'Enter Product Subscription ID',
+        function() {
+            $val = get_option('corporate_subscription_product_id');
+            echo '<input type="text" name="corporate_subscription_product_id" value="' . esc_attr($val) . '" />';
+        },
+        'corporate-settings',
+        'corporate_settings_section'
+    );
+    
+	
+    add_settings_field(
+        'corporate_subscription_enable_test',
+        'Enable',
+        function() {
+            $enable_stat = get_option('corporate_subscription_enable_test');
+			//echo 'stat : '. $enable_stat;
+            echo '<input type="checkbox" name="corporate_subscription_enable_test" value="1" ' . checked(1, $enable_stat, false) . ' />';
+        },
+        'corporate-member-expire-testing',
+        'corporate_expired_test_section'
+    );
+    
+   
+   add_settings_section(
+		'group_two_section',
+		'<p>Expiry Date will set to : 2020-06-25</p>',  // Visual separator
+		'__return_false',
+		'corporate-member-expire-testing',
+        'corporate_expired_test_section'
+	);
+	
+	
+    add_settings_field(
+        'corporate_subscription_dropdown_user_id',
+        'Select applied user id',
+        function() {
+            $subscription_user_id = get_option('corporate_subscription_dropdown_user_id');
+
+			$args = array(
+				'orderby' => 'display_name',
+				'order'   => 'ASC'
+			);
+             $user_query = new WP_User_Query($args);
+            ?>
+            <select name="corporate_subscription_dropdown_user_id">
+				 <option value="">Select User</option>
+				<?php 
+                if (!empty($user_query->get_results())) { 
+					foreach ( $user_query->get_results() as $user ) {
+					?>
+                		<option value="<?php echo $user->ID;?>" <?php echo selected($subscription_user_id, $user->ID); ?>><?php echo esc_html($user->display_name) . '('. esc_html($user->user_email ).')';?></option>
+				<?php } 
+				}
+				?>
+            </select>
+            <?php
+
+			SetSubscriptiontoExpiredForTestPurpose();
+        },
+        'corporate-member-expire-testing',
+        'corporate_expired_test_section'
+    );
+   
+
+  
+
+
+});
+
+
+add_action('admin_enqueue_scripts', 'load_custom_admin_datatables_for_corporate_member_list');
+function load_custom_admin_datatables_for_corporate_member_list($hook) {
+    // Only load on your custom admin page
+    if ($hook !== 'toplevel_page_corporate-members') return;
+
+    // DataTables core
+    wp_enqueue_style('datatables-css', 'https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css');
+    wp_enqueue_script('datatables-js', 'https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js', ['jquery'], null, true);
+
+    // Optional: Custom script for initialization
+    //wp_enqueue_script('my-admin-datatables-init', plugin_dir_url(__FILE__) . 'js/admin-datatables-init.js', ['jquery', 'datatables-js'], null, true);
+}
+
+function corporate_members_dashboard() {
+
+		$limit_entry = get_option('corporate_limit_members_entry');
+		$limit_entry = ($limit_entry != '')?$limit_entry:10;
+	 ?>
+	<style>
+		.wrap-corporate-member { max-width:800px; }
+		.corporate-member-table { width: 100%;}
+		.corporate-member-table th,.corporate-member-table td {padding: 12px 15px; text-align: left;}
+		.corporate-member-table th { font-weight: 600; }
+	</style>
+    <?php
+    echo '<div class="wrap-corporate-member">';
+    echo '<h1>Corporate Members</h1>';
+	echo '<p style="text-align:right;"><a href="'.admin_url('admin-post.php?action=export_corporate_members_to_csv').'" class="button">Export All</a></p>';
+	$html .= '<table id="admin-corporate-member-table" class="corporate-member-table row-border stripe" style="width:100%">';
+	   $html .= '<thead>';
+			$html .= '<tr>';
+				$html .= '<th>ID</th><th>First Name</th><th>Last Name</th><th>Corporate To</th> <th>Corporate Email</th>  <th>Corporate Status</th> <th>Action</th>';
+			$html .= '</tr>';
+		$html .= '</thead>';
+	$html .= '</table>';
+	echo $html;
+    echo '</div>';
+	?>
+	<script>
+		jQuery(document).ready(function (jQuery) {
+
+			jQuery('#admin-corporate-member-table').DataTable({
+					ajax: {
+						url: '<?php echo admin_url('admin-ajax.php'); ?>',
+						type: 'POST',
+						data: { action: 'get_all_corporate_members_by_admin' }
+					},
+					createdRow: function(row, data, dataIndex) {
+						// Assuming data[0] is the unique ID from your data source
+						jQuery(row).attr('id', 'member-row-' + data[0]);
+					},
+					pageLength: <?php echo $limit_entry; ?>
+    		});
+
+            // Delete row admin corporate member
+			jQuery(document).on('click','.btn-delete',function(e) {
+				e.preventDefault();
+				jQuery(this).text('Deleting...');
+				if ( !confirm('Are you sure you want to delete this?') ) {
+					return false;
+				}
+				id = jQuery(this).attr('data_id');
+				jQuery.ajax({
+					url: "<?php echo admin_url('admin-ajax.php');?>",
+					type: 'POST',
+					data: {
+						id: id,
+						is_administrator: 'yes',
+						action: 'delete_corporate_member',
+						security: "<?php echo wp_create_nonce('corporate_member'); ?>"
+					},
+					success: function(response) {
+							console.log(response.data);
+							jQuery('#member-row-'+id).remove();
+							jQuery(this).text('Delete');
+					}
+				});
+			});
+
+			
+		});
+	</script>
+
+
+
+	<?php 
+}
+add_action('wp_ajax_get_all_corporate_members_by_admin', 'get_all_corporate_members_by_admin');
+function get_all_corporate_members_by_admin() {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'corporate_members';
+    $results = $wpdb->get_results("SELECT id, fname, lname, corporate_name, corporate_email, corporate_status FROM $table_name  WHERE status='active'" , ARRAY_A);
+
+    $data = array();
+	if($results) {
+		$n=1;
+        foreach ($results as $row) {
+        	$data[] = [$n, $row['fname'], $row['lname'], $row['corporate_name'], $row['corporate_email'], ucfirst($row['corporate_status']),'<a data_id="'.$row['id'].'" class="btn-delete" href="#">Delete</a>'];
+    	    $n++;
+		}
+
+	}
+   
+    wp_send_json(['data' => $data]);
+}
+
+
+
+add_action('admin_post_export_corporate_members_to_csv', 'export_corporate_members_to_csv');
+
+
+/* Import vendor file */
+require_once get_stylesheet_directory() . '/vendor/autoload.php';
+
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+
+function export_corporate_members_to_csv() {
+    if (!current_user_can('manage_options')) {
+        wp_die('Unauthorized');
+    }
+
+    // Create spreadsheet
+    $spreadsheet = new Spreadsheet();
+    $sheet = $spreadsheet->getActiveSheet();
+   
+	$sheet->getStyle('A1:F1')->getFont()->setBold(true);
+	$sheet->getColumnDimension('A')->setWidth(10);
+	$sheet->getColumnDimension('B')->setWidth(30);
+	$sheet->getColumnDimension('C')->setWidth(30);
+	$sheet->getColumnDimension('D')->setWidth(30);
+	$sheet->getColumnDimension('E')->setWidth(30);
+	$sheet->getColumnDimension('F')->setWidth(30);
+	$sheet->getStyle('A:F')->getAlignment()->setWrapText(true);
+	$sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+	$sheet->getStyle('A1:F1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+
+   // Headers
+    $sheet->setCellValue('A1', 'No.');
+    $sheet->setCellValue('B1', 'Firstname');
+    $sheet->setCellValue('C1', 'Lastname');
+	$sheet->setCellValue('D1', 'Corporate To');
+    $sheet->setCellValue('E1', 'Corporate Email');
+	$sheet->setCellValue('F1', 'Corporate Status');
+
+
+
+	global $wpdb;
+    $table_name = $wpdb->prefix . 'corporate_members';
+    $results = $wpdb->get_results("SELECT id, fname, lname, corporate_name, corporate_email, corporate_status FROM $table_name  WHERE status='active'");
+    
+	// Content
+	$n = 1;
+    $row = 2;
+	if($results) {
+          foreach ($results as $res) {
+			$sheet->setCellValue('A' . $row, $n);
+			$sheet->setCellValue('B' . $row, $res->fname);
+			$sheet->setCellValue('C' . $row, $res->lname);
+			$sheet->setCellValue('D' . $row, $res->corporate_name);
+			$sheet->setCellValue('E' . $row, $res->corporate_email);
+			$sheet->setCellValue('F' . $row, ucfirst($res->corporate_status));
+			$row++;
+			$n++;
+		}
+	}
+   
+
+     // Download
+    $filename = 'corporate-members-' . date('Y-m-d') . '.xlsx';
+ 	header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    header('Content-Disposition: attachment;filename="'.$filename.'"');
+    header('Cache-Control: max-age=0');
+
+    $writer = new Xlsx($spreadsheet);
+    $writer->save('php://output');
+    exit;
+}
+
+
+/* this will display on my account page area */
+function corporate_members_my_account() {
+	// check if current user has an account subscription
+    $current_user_id = get_current_user_id();
+	$product_id = get_option('corporate_subscription_product_id'); // Your product ID
+	$meta_key = 'subscription-status'; // Replace with your meta key
+	$meta_value = 'Active'; // The meta value to match
+
+   if(has_user_ordered_product_with_meta($current_user_id, $product_id, $meta_key, $meta_value)) { 
+	    add_rewrite_endpoint( 'corporate-members', EP_ROOT | EP_PAGES );
+    } 
+    
+}
+add_action( 'init', 'corporate_members_my_account' );
+
+function corporate_members_my_account_menu( $items ) {
+
+
+	// check if current user has an account subscription
+    $current_user_id = get_current_user_id();
+	$product_id = get_option('corporate_subscription_product_id'); // Your product ID
+	$meta_key = 'subscription-status'; // Replace with your meta key
+	$meta_value = 'Active'; // The meta value to match
+
+   if(has_user_ordered_product_with_meta($current_user_id, $product_id, $meta_key, $meta_value)) {
+
+          // Insert before logout
+    		$items = array_slice( $items, 0, count($items) - 1, true ) +
+             [ 'corporate-members' => __( 'Corporate Members', 'woocommerce' ) ] +
+             array_slice( $items, count($items) - 1, null, true );
+   }
+
+
+    
+    return $items;
+}
+add_filter( 'woocommerce_account_menu_items', 'corporate_members_my_account_menu' );
+
+
+function corporate_member_tab_content() {
+
+
+    $html = '';
+	$current_user = wp_get_current_user();
+	$user_email = $current_user->user_email;
+	$username = $current_user->user_login;
+	$user_id = $current_user->ID;
+	//$user_id = get_current_user_id();
+
+
+    $html .= '<h3>' . __( 'Member Entry', 'woocommerce' ) . '</h3>';
+	$html .= '<form method="post" id="corporate-member-form">';
+		$html .= '<div class="woocommerce-address-fields">';
+			$html .= '<div class="woocommerce-address-fields__field-wrapper">';
+				$html .= '<p class="form-row form-row-first validate-required" id="corporate_mem_fname_field" data-priority="10">';
+					$html .= '<label for="corporate_mem_fname" class="required_field">First name&nbsp;<span class="required" aria-hidden="true">*</span></label>';
+					   $html .= '<span class="woocommerce-input-wrapper">';
+						$html .= '<input type="text" class="input-text " name="corporate_mem_fname" id="corporate_mem_fname" placeholder="" value="" aria-required="true" autocomplete="given-name">';
+					$html .= '</span>';
+				$html .= '</p>';
+				$html .= '<p class="form-row form-row-last validate-required" id="corporate_mem_lname_field" data-priority="20">';
+					$html .= '<label for="corporate_mem_lname" class="required_field">Last name&nbsp;<span class="required" aria-hidden="true">*</span></label>';
+					$html .= '<span class="woocommerce-input-wrapper">';
+						$html .= '<input type="text" class="input-text " name="corporate_mem_lname" id="corporate_mem_lname" placeholder="" value="" aria-required="true" autocomplete="family-name">';
+					$html .= '</span>';
+				$html .= '</p>';
+			$html .= '</div>';
+			$html .= '<p>';
+				$html .= '<button type="submit" class="button save-member" name="save_corporate_mem_entry" value="Save Entry">Save Entry</button>';
+			$html .= '</p>';
+		$html .= '</div>';
+		 $html .= '<input type="hidden" name="nonce" value="'.wp_create_nonce('corporate_member_form_nonce').'">';
+		 //$html .= '<input type="hidden" name="corporate_id" value="'.$user_id.'">';
+		 $html .= '<input type="hidden" name="corporate_name" value="'.esc_html($username).'">';
+		 $html .= '<input type="hidden" name="corporate_email" value="'.esc_html($user_email).'">';
+		 //$html .= '<input type="hidden" name="corporate_status" value="Active">';
+		 $html .= '<input type="hidden" id="member-id" name="id" value="">';
+		$html .= ' <input type="hidden" name="action" value="corporate_members_entry">';
+   $html .= '</form>';
+  $html .= '<h3>' . __( 'Corporate Members', 'woocommerce' ) . '</h3>';
+  $html .= '<table id="corporate-member-table">';
+     $html .= '<tr>';
+	   $html .= '<th>&nbsp;</th><th>First Name</th><th>Last Name</th><th>Action</th>';
+	 $html .= '</tr>';
+	 $html .= '<tr>';
+	   $html .= '<td colspan="4">Loading...</td>';
+	 $html .= '</tr>';
+  $html .= '</table>';
+    
+    //display get corporate members
+  	$html .= '<script>//jQuery(document).ready(function(jQuery) {
+			function loadCorporateMembersData() {
+			   jQuery(document).ready(function(jQuery) {
+					jQuery.ajax({
+						url: "'.admin_url('admin-ajax.php').'",
+						type: \'POST\',
+						data: {
+							action: \'get_corporate_members\',
+							security: "'.wp_create_nonce('corporate_member_nonce').'",
+							//keyword: $(\'#my-input\').val()  // example input field
+						},
+						success: function(response) {
+						     //alert(\'load table data\');
+							 jQuery(\'#corporate-member-table\').html(response);
+						}
+					});
+				});
+			}
+			//load member table
+			loadCorporateMembersData();
+			//});
+			</script>';
+
+
+   // save form
+	$html .= '<script>jQuery(\'#corporate-member-form\').on(\'submit\', function(e) {
+			e.preventDefault();
+			jQuery(\'.save-member\').html(\'Saving Entry...\');
+			var formData = jQuery(this).serialize();
+			console.log(formData);
+			jQuery.ajax({
+				type: \'POST\',
+				url: "'.admin_url('admin-ajax.php').'", // Or use wp_localize_script to set it
+				data: formData,
+				success: function(response) {
+					alert(response.data.message);
+					console.log(response);
+					loadCorporateMembersData();
+					setTimeout(function() {
+						jQuery(\'.save-member\').html(\'Save Entry\');
+					}, 2000);	
+                    //reset input form
+				    jQuery(\'#corporate_mem_fname\').val(\'\');
+					jQuery(\'#corporate_mem_lname\').val(\'\');
+					jQuery(\'#member-id\').val(\'\');
+				},
+				error: function(err) {
+					alert(\'Error occurred\');
+					console.log(err);
+				}
+			});
+		});</script>';
+      
+
+	//delete corporate member or meaning set the member status to inactive
+  	$html .= '<script>jQuery(document).on(\'click\',\'.btn-delete\',function(e) {
+	                e.preventDefault();
+					jQuery(this).text(\'Deleting...\');
+					if ( !confirm(\'Are you sure you want to delete this?\') ) {
+						return false;
+					}
+					id = jQuery(this).attr(\'data_id\');
+					jQuery.ajax({
+						url: "'.admin_url('admin-ajax.php').'",
+						type: \'POST\',
+						data: {
+						    id: id,
+							action: \'delete_corporate_member\',
+							security: "'.wp_create_nonce('corporate_member').'"
+						},
+						success: function(response) {
+						     	console.log(response.data);
+								jQuery(\'#member-row-\'+id).remove();
+								jQuery(this).text(\'Delete\');
+						}
+					});
+				});</script>';
+
+	//GET single member record
+  	$html .= '<script>jQuery(document).on(\'click\',\'.btn-edit\',function(e) {
+	                e.preventDefault();
+					id = jQuery(this).attr(\'data_id\');
+					jQuery(this).text(\'Retrieving...\');
+					jQuery.ajax({
+						url: "'.admin_url('admin-ajax.php').'",
+						type: \'POST\',
+						data: {
+						    id: id,
+							action: \'get_single_corporate_member\',
+							security: "'.wp_create_nonce('corporate_member').'"
+						},
+						success: function(response) {
+						     	 //console.log(response.data);
+								  jQuery(\'#corporate_mem_fname\').val(response.data.result.fname);
+								  jQuery(\'#corporate_mem_lname\').val(response.data.result.lname);
+								  jQuery(\'#member-id\').val(response.data.result.id);
+								  jQuery(\'.btn-edit\').text(\'Edit\');
+								  jQuery(\'.save-member\').text(\'Update Member\');
+								 // console.log(response.data.result.fname);
+						}
+					});
+				});</script>';
+	
+      echo  $html;
+
+
+
+}
+add_action( 'woocommerce_account_corporate-members_endpoint', 'corporate_member_tab_content' );
+
+
+//add_action('wp_ajax_nopriv_corporate_members_entry', 'corporate_members_entry'); this is fo non login user
+add_action('wp_ajax_corporate_members_entry', 'corporate_members_entry');
+function corporate_members_entry() { //  SAVE CORPORATE MEMBER
+    // Only allow logged-in users
+    if (!is_user_logged_in()) {
+        wp_send_json_error(['message' => 'You must be logged in.'], 401);
+    }
+    // Verify nonce
+    if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'corporate_member_form_nonce')) {
+        wp_send_json_error(['message' => 'Invalid nonce'], 400);
+    }
+
+	 $user_id = get_current_user_id();
+
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'corporate_members'; // Make sure this table exists
+    $id = sanitize_text_field($_POST['id']);
+    $corporate_mem_fname = sanitize_text_field($_POST['corporate_mem_fname']);
+	$corporate_mem_lname = sanitize_text_field($_POST['corporate_mem_lname']);
+	//$corporate_id = sanitize_text_field($_POST['corporate_id']);
+	$corporate_id =  $user_id;
+	$corporate_name = sanitize_text_field($_POST['corporate_name']);
+	$corporate_email = sanitize_text_field($_POST['corporate_email']);
+
+	$current_count = $wpdb->get_var( "SELECT COUNT(*) FROM $table_name where corporate_id=$user_id AND status='active'" );
+    
+	if($id){
+          
+			 $updated = $wpdb->update(
+				$table_name,
+					[
+						'fname' => $corporate_mem_fname,
+						'lname' => $corporate_mem_lname,
+					], 
+					[
+						'id' => $id,
+						'corporate_id' => $corporate_id,
+					]
+			);
+			if ($updated !== false) {
+				wp_send_json_success(['message' => 'Member updated successfully!']);
+			} else {
+				wp_send_json_error(['message' => 'Update failed or no changes made.']);
+			}
+
+	} else {
+
+        $limit_entry = get_option('corporate_limit_members_entry');
+		$limit_entry = ($limit_entry != '')?$limit_entry:1;
+		$limit_entry = isset($limit_entry)?$limit_entry:1;
+		if ( $current_count < $limit_entry ) {
+				$wpdb->insert($table_name, [
+					'fname' => $corporate_mem_fname,
+					'lname' => $corporate_mem_lname,
+					'corporate_id' => $corporate_id,
+					'corporate_name' => $corporate_name,
+					'corporate_email' => $corporate_email,
+					'created_at' => current_time('mysql'),
+				]);
+
+				 wp_send_json_success(['message' => 'Member entry saved!']);
+
+		 } else {
+               
+			    wp_send_json_success(['message' => 'Max '.$limit_entry.' entries are reached.']);
+
+		 }
+
+		
+	}
+   
+    
+   
+}
+
+
+add_action('wp_ajax_delete_corporate_member', 'delete_corporate_member');
+
+function delete_corporate_member() {
+   
+	 $user_id = get_current_user_id();
+	check_ajax_referer('corporate_member', 'security');
+	$id = intval($_POST['id']);
+	global $wpdb;
+	$table_name = $wpdb->prefix . 'corporate_members'; // Change this to your actual table name
+  
+	/* INSTEAD OF DELETE TRY CHANGE THE STATUS TO INACTIVE */
+    $is_administrator = isset($_POST['is_administrator'])?$_POST['is_administrator']:'';
+
+	if($is_administrator == 'yes'){ // check if delete is from administrator
+          	$updated = $wpdb->update(
+				$table_name,
+				['status'  => 'inactive'], 
+				['id' => $id]
+			);    
+
+	} else {
+
+           $updated = $wpdb->update(
+			$table_name,
+			['status'  => 'inactive'], 
+			[
+				'id' => $id,
+				'corporate_id' => $user_id,
+			]);
+
+	}
+
+	if ($updated !== false) {
+		wp_send_json_success('Member record is deleted successfully!');
+	} else {
+		wp_send_json_error('Update failed or no changes made.');
+	}
+
+}
+
+// GET CORPORATE MEMBERS
+add_action('wp_ajax_get_corporate_members', 'get_corporate_members');
+function get_corporate_members() {
+    
+    check_ajax_referer('corporate_member_nonce', 'security');
+    $user_id = get_current_user_id();
+    global $wpdb;
+	$table_name = $wpdb->prefix . 'corporate_members';
+    //$keyword = sanitize_text_field($_POST['keyword']);
+    
+    $results = $wpdb->get_results(
+	   $wpdb->prepare("SELECT * FROM $table_name WHERE corporate_id = $user_id AND status='active'")
+    );
+    
+	$html = '';
+     $html .= '<tr>';
+	   $html .= '<th>&nbsp;</th><th>First Name</th><th>Last Name</th><th>Action</th>';
+	 $html .= '</tr>';
+    if (!empty($results)) {
+		$n=1;
+        foreach ($results as $row) {
+			$html .= '<tr id="member-row-' . esc_html($row->id) . '">';
+				$html .='<td>' .$n . '</td>';
+				$html .= '<td>' . esc_html($row->fname) . '</td>';
+				$html .= '<td>' . esc_html($row->lname) . '</td>';
+				$html .= '<td><a data_id="' . esc_html($row->id) . '" href="#" class="btn-edit">Edit</a> | <a data_id="' . esc_html($row->id) . '" class="btn-delete" href="#">Delete</a></td>';
+			$html .= '</tr>';
+			$n++;
+        }
+
+	
+    } else {
+        $html .= '<tr><td colspan="4">No results found.</td></tr>';
+    }
+
+	echo $html;
+    wp_die();
+}
+
+// GET SINGLE CORPORATE MEMBER
+add_action('wp_ajax_get_single_corporate_member', 'get_single_corporate_member');
+function get_single_corporate_member() {
+    
+    check_ajax_referer('corporate_member', 'security');
+    $user_id = get_current_user_id();
+	$id = intval($_POST['id']);
+    global $wpdb;
+	$table_name = $wpdb->prefix . 'corporate_members';
+   
+    $result = $wpdb->get_row(
+		$wpdb->prepare("SELECT * FROM $table_name WHERE id =  $id AND corporate_id = $user_id AND status='active'")
+	);
+
+    //$result = $wpdb->get_row($query); // Get one row as an object
+	if ($result) {
+		// Record found
+		 wp_send_json_success(['result' => $result]);
+	} else {
+		// No match;
+		wp_send_json_error('No record found.');
+	}
+}
+
+/* ADD expiry date on subscription product */
+// 1. Add expiry date to order item when order is created
+add_action('woocommerce_checkout_create_order_line_item', 'add_expiry_date_to_order_item', 10, 4);
+function add_expiry_date_to_order_item($item, $cart_item_key, $values, $order) {
+	 $product = $values['data']; // WC_Product object
+     $product_id = $product->get_id();
+    // check if product is in order added. you can get set this on corporate member setting page admin
+	$subscription_product_id = get_option('corporate_subscription_product_id');
+	if ($product_id == $subscription_product_id) {
+		// Set expiry to 1 year from now
+		$expiry_date = date('Y-m-d', strtotime('+1 year'));
+		$item->add_meta_data('expiry-date', $expiry_date, true);
+		$item->add_meta_data('subscription-status','Active', true);
+
+
+		//Set all database table corporate status as Expired
+		global $wpdb;
+		$table_name = $wpdb->prefix . 'corporate_members'; // Make sure this table exists
+		$current_user_id = get_current_user_id();	
+		$updated = $wpdb->update(
+			$table_name,
+				[
+					'corporate_status' => 'active'
+				], 
+				[
+					'corporate_id' => $current_user_id,
+					'status' => 'active',
+				]
+		);
+
+	}
+}
+
+// 2. Show expiry date in order details (backend)
+/*
+add_action('woocommerce_after_order_itemmeta', 'show_expiry_date_in_admin', 10, 3);
+function show_expiry_date_in_admin($item_id, $item, $product) {
+    $expiry_date = wc_get_order_item_meta($item_id, 'expiry-date', true);
+	$subscription_status = wc_get_order_item_meta($item_id, 'subscription-status', true);
+    if ($expiry_date) {
+		  $expiry_date = date_create( $expiry_date );
+		  $expiry_date =  date_format(  $expiry_date  , "F d, Y" );
+          echo '<p><strong>' . __('Expiry Date2') . ':</strong> ' . esc_html($expiry_date) . '</p>';
+    }
+
+	if ($subscription_status) {
+          echo '<p><strong>' . __('Status2') . ':</strong> ' . esc_html($subscription_status) . '</p>';
+    }
+}
+*/
+
+/* Display expiry date on order table */
+add_filter('woocommerce_my_account_my_orders_columns', 'add_expiry_date_column');
+function add_expiry_date_column($columns) {
+    $new_columns = [];
+
+    foreach ($columns as $key => $name) {
+        $new_columns[$key] = $name;
+        if ($key === 'order-date') {
+            $new_columns['expiry-date'] = __('Expiry Date', 'your-textdomain');
+        }
+    }
+
+    return $new_columns;
+}
+
+add_action('woocommerce_my_account_my_orders_column_expiry-date', 'display_expiry_date_column');
+function display_expiry_date_column($order) {
+    $items = $order->get_items();
+    $dates = [];
+
+    foreach ($items as $item) {
+         $expiry =  $item->get_meta('expiry-date');
+		 $subscription_status =  $item->get_meta('subscription-status');
+		 
+        if ($expiry) {
+            $expiry = date_create($expiry);
+			$expiry =  date_format(  $expiry  , "F d, Y" );
+            $dates[] = esc_html($expiry);
+        }
+
+		if ($subscription_status) {
+            $dates[] = 'Subscription Status : '. esc_html($subscription_status);
+        }
+    }
+
+    echo implode('<br>', array_unique($dates)) ?: '-';
+}
+
+/*
+add_action('woocommerce_order_item_meta_end', 'show_expiry_date_in_my_account_orders', 10, 4);
+function show_expiry_date_in_my_account_orders($item_id, $item, $order, $plain_text) {
+    if (is_account_page() && !is_admin()) {
+        $expiry = wc_get_order_item_meta($item_id, 'expiry-date', true);
+        if ($expiry) {
+            echo '<p><strong>' . __('Expiry Date 2:', 'woocommerce') . '</strong> ' . esc_html($expiry) . '</p>';
+        }
+    }
+}
+*/
+
+
+add_filter('woocommerce_order_item_display_meta_key', 'rename_expiry_date_label', 10, 3);
+function rename_expiry_date_label($display_key, $meta, $item) {
+    if ($meta->key === 'expiry-date') {
+        return __('Expiry Date', 'woocommerce');
+    }
+	 if ($meta->key === 'subscription-status') {
+        return __('Subscription Status', 'woocommerce');
+    }
+    return $display_key;
+}
+
+add_filter('woocommerce_order_item_display_meta_value', 'rename_expiry_date_value', 10, 3);
+function rename_expiry_date_value($display_value, $meta, $item) {
+    if ($meta->key === 'expiry-date') {
+		$display_value = date_create($display_value);
+		$display_value =  date_format(  $display_value  , "F d, Y" );
+    }
+	
+    return $display_value;
+}
+
+
+
+function has_user_ordered_product_with_meta($user_id, $product_id, $meta_key, $meta_value) {
+     if (!$user_id || !$product_id || !$meta_key) return false;
+
+    $customer_orders = wc_get_orders([
+        'customer_id' => $user_id,
+        'limit'       => -1,
+        'status'      => ['wc-completed', 'wc-processing'], // Include successful orders only
+    ]);
+
+     foreach ($customer_orders as $order) {
+        foreach ($order->get_items() as $item) {
+            if ((int) $item->get_product_id() === (int) $product_id) {
+                $item_meta_value = wc_get_order_item_meta($item->get_id(), $meta_key, true);
+                if ($item_meta_value == $meta_value) {
+                    return true;
+                }
+            }
+        }
+     }
+
+    return false;
+}
+
+
+// check if order status every login if corporate subscription is expired.
+
+add_action('wp_login', 'run_et_expired_subscription' , 10, 2);
+function run_et_expired_subscription($user_login, $user) {
+    // check and make status as expired
+    //$current_user_id = get_current_user_id();
+	 $current_user_id = $user->ID;
+	$product_id = get_option('corporate_subscription_product_id'); // Your product ID
+	$meta_key = 'subscription-status'; // Replace with your meta key
+	$meta_value = 'Active'; // The meta value to match
+
+    $customer_orders = wc_get_orders([
+        'customer_id' => $current_user_id,
+        'limit'       => -1,
+        'status'      => ['wc-completed', 'wc-processing'], // Include successful orders only
+    ]);
+
+     foreach ($customer_orders as $order) {
+        foreach ($order->get_items() as $item) {
+            if ((int) $item->get_product_id() === (int) $product_id) {
+                $item_meta_value = wc_get_order_item_meta($item->get_id(), $meta_key, true);
+                if ($item_meta_value == $meta_value) {
+                    //return true;
+					//test expiration date if expired
+                    $expiry_date = wc_get_order_item_meta($item->get_id(), 'expiry-date', true);
+					$today = date('Y-m-d');
+					// Check if expired today or earlier
+					if (strtotime($expiry_date) <= strtotime($today)) {
+						//echo 'Expired or expires today';
+						// update order meta subscription status as expired
+                        wc_update_order_item_meta( $item->get_id(), 'subscription-status', 'Expired' );
+					   
+						//Set all database table corporate status as Expired
+                      	global $wpdb;
+						$table_name = $wpdb->prefix . 'corporate_members'; // Make sure this table exists
+							
+						$updated = $wpdb->update(
+							$table_name,
+								[
+									'corporate_status' => 'expired'
+								], 
+								[
+									'corporate_id' => $current_user_id,
+									'status' => 'active',
+								]
+						);
+						/*
+						if ($updated !== false) {
+							// file_put_contents(WP_CONTENT_DIR . '/cron-corporate-members-log.txt',  "Sucess User id use to update corporate status to expired : ".$current_user_id." - Ran at " . current_time('mysql') . "\n", FILE_APPEND);
+						} else {
+							
+							// file_put_contents(WP_CONTENT_DIR . '/cron-corporate-members-log.txt',  "Failed User id use to update corporate status to expired : ".$current_user_id." - Ran at " . current_time('mysql') . "\n", FILE_APPEND);
+						}
+					    */
+						
+
+					}
+
+                }
+            }
+        }
+     }
+
+
+ 
+}
+
+//add_action('update_option_corporate_expire_testing_group', 'SetSubscriptiontoExpiredForTestPurpose', 10, 3);
+function SetSubscriptiontoExpiredForTestPurpose() {
+        // die('tester-globaly');
+        $enable_stat = get_option('corporate_subscription_enable_test');
+
+		$user_id = get_option('corporate_subscription_dropdown_user_id');
+		$product_id = get_option('corporate_subscription_product_id'); // Your product ID
+		 // Replace with your meta key
+        //enabled to set this expiriry
+	    if( $enable_stat == 1 ) {
+                
+			$meta_key = 'subscription-status';
+			$meta_value = 'Active';
+
+			$customer_orders = wc_get_orders([
+				'customer_id' => $user_id,
+				'limit'       => -1,
+				'status'      => ['wc-completed', 'wc-processing'], // Include successful orders only
+			]);
+			
+			if( $customer_orders ) {
+					foreach ($customer_orders as $order) {
+						foreach ($order->get_items() as $item) {
+							if ((int) $item->get_product_id() === (int) $product_id) {
+
+								$item_meta_value = wc_get_order_item_meta($item->get_id(), $meta_key, true);
+                                if ($item_meta_value == $meta_value) {
+									     
+                                          wc_update_order_item_meta( $item->get_id(), 'expiry-date', '2020-06-25' );
+										  wc_update_order_item_meta( $item->get_id(), 'subscription-status', 'Expired' );
+								}
+								
+							}
+						}
+					}
+			}
+
+            
+		} else {
+            
+			$meta_key = 'expiry-date';
+			$meta_value = '2020-06-25';
+
+			$customer_orders = wc_get_orders([
+				'customer_id' => $user_id,
+				'limit'       => -1,
+				'status'      => ['wc-completed', 'wc-processing'], // Include successful orders only
+			]);
+			
+			if( $customer_orders ) {
+					foreach ($customer_orders as $order) {
+                        $expiry_date = '';
+						$order_date = $order->get_date_created();
+						if ( $order_date ) {
+							$new_date = clone $order_date;
+							$expiry_date = $new_date->modify('+1 year');
+
+							//echo 'Original Order Date: ' . $order_date->date('Y-m-d') . '<br>';
+							//echo 'New Date +1 Year: ' . $new_date->date('Y-m-d');
+						}
+
+						//$order_date = $order_date->date( 'Y-m-d' );
+						//$expiry_date = date($order_date, strtotime('+1 year'));
+
+						foreach ($order->get_items() as $item) {
+							if ((int) $item->get_product_id() === (int) $product_id) {
+
+								$item_meta_value = wc_get_order_item_meta($item->get_id(), $meta_key, true);
+                                if ($item_meta_value == $meta_value) {
+
+                                          wc_update_order_item_meta( $item->get_id(), 'expiry-date', $expiry_date );
+										  wc_update_order_item_meta( $item->get_id(), 'subscription-status', 'Active' );
+								}
+								
+							}
+						}
+					}
+			}
+
+		}
+
+
+}
+
+
+
+/*Create Corporate Member Table - To activate this, just run the "Corporate Members (Table Creation Script Only)" plugin*/
+/* Create Corporate Member Table */
+register_activation_hook(__FILE__, 'create_corporate_members_table');
+
+function create_corporate_members_table() {
+    global $wpdb;
+
+    $table_name = $wpdb->prefix . 'corporate_members';
+    $charset_collate = $wpdb->get_charset_collate();
+
+    $sql = "CREATE TABLE $table_name (
+        id mediumint(25) NOT NULL AUTO_INCREMENT,
+        fname varchar(255) NOT NULL,
+		lname varchar(255) NOT NULL,
+		corporate_id varchar(25) NOT NULL,
+		corporate_name varchar(250) NOT  NULL,
+        corporate_email varchar(100)  NOT NULL,
+        corporate_status VARCHAR(10) DEFAULT 'active' NOT NULL,
+		status VARCHAR(10) DEFAULT 'active' NOT NULL,
+        created_at datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
+        PRIMARY KEY  (id)
+    ) $charset_collate;";
+
+    require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+    dbDelta($sql);
+}
