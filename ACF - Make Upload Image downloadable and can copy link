@@ -7,6 +7,12 @@ function make_acf_image_downloadable_admin($field) {
             $image_url = wp_get_attachment_url($image_id);
             $file_name = basename(get_attached_file($image_id));
             echo '<p><a href="' . esc_url($image_url) . '" download="' . esc_attr($file_name) . '" target="_blank" style="color: #2271b1;">Download QR Code</a></p>';
+           ?> 
+			<div style="margin-top:10px;">
+				<input type="text" id="acf-copy-image-url" value="<?php echo $image_url; ?>" readonly style="width: 80%;">
+				<button type="button" class="button" onclick="navigator.clipboard.writeText(document.getElementById('acf-copy-image-url').value)">Copy Link</button>
+			</div>
+			<?php
         }
     }
 }
