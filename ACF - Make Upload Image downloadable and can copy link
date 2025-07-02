@@ -1,0 +1,12 @@
+
+add_action('acf/render_field/name=t_upload_qr_code', 'make_acf_image_downloadable_admin', 10, 1);
+function make_acf_image_downloadable_admin($field) {
+    if (is_admin()) {
+        $image_id = $field['value'];
+        if ($image_id) {
+            $image_url = wp_get_attachment_url($image_id);
+            $file_name = basename(get_attached_file($image_id));
+            echo '<p><a href="' . esc_url($image_url) . '" download="' . esc_attr($file_name) . '" target="_blank" style="color: #2271b1;">Download QR Code</a></p>';
+        }
+    }
+}
