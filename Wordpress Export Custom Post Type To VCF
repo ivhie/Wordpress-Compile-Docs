@@ -1,0 +1,42 @@
+add_shortcode('download_vcf', function () {
+    $url = add_query_arg([
+        'download_vcf' => '1',
+        'post_id' => get_the_ID(),
+    ], site_url());
+
+    return '<a class="download-vcf" href="' . esc_url($url) . '">SAVE CONTACT</a>';
+});
+
+
+add_action('init', function () {
+    if (!isset($_GET['download_vcf']) || !isset($_GET['post_id'])) return;
+
+    $post_id = intval($_GET['post_id']);
+    $post = get_post($post_id);
+    if (!$post || $post->post_type !== 'team-member') return;
+
+    // Sample meta fields
+   // $full_name = get_post_meta($post_id, 'post_title', true);
+	$full_name = get_the_title($post_id);
+    $email     = get_post_meta($post_id, 't_email', true);
+    $phone     = get_post_meta($post_id, 't_phone', true);
+	//$full_name = str_replace(' ', '-', $full_name);
+  
+	// VCF content
+	$vcf = "BEGIN:VCARD\r\n";
+	$vcf .= "VERSION:3.0\r\n";
+	$vcf .= "N:$full_name\r\n";
+	$vcf .= "FN:$full_name\r\n";
+	$vcf .= "TEL;TYPE=CELL:$phone\r\n";
+	$vcf .= "EMAIL:$email\r\n";
+	$vcf .= "END:VCARD\r\n";
+
+	// Set headers for download
+	header('Content-Type: text/vcard');
+	header('Content-Disposition: attachment; filename='.$full_name.'.vcf');
+	header('Content-Length: ' . strlen($vcf));
+
+	// Output the VCF
+	echo $vcf;
+	exit;
+});
