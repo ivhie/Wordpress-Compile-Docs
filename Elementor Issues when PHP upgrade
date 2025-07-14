@@ -1,0 +1,5 @@
+8.2 Set PHP ini to this settings
+memory_limit = 256M to 1024M
+max_execution_time = 30 to 300
+post_max_size = 8M to 512M
+upload_max_filesize = 8M to 512M
