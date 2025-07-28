@@ -167,6 +167,11 @@ add_shortcode('all-listing-news-blogs', 'alllatest_listing_blogs');
 function alllatest_listing_blogs($atts){ 
     global $post;
     ob_start();
+   /* Incase you will used this */
+   $atts = shortcode_atts(array(
+        'post_per_page' => '12',
+    ), $atts, 'blog-grid-listing');
+				
     $posts_per_page =  get_post_meta($post->ID, 'Display number of news', TRUE); // get custom post data
     $posts_per_page = isset($posts_per_page)?$posts_per_page:'-1';
     $paged = isset($_POST['paged'])?$_POST['paged'] : 1;
@@ -195,6 +200,7 @@ function alllatest_listing_blogs($atts){
     $html .= '<div id="listing_news_wrapp" class="listing_news_wrapp" posts_per_page="'.$posts_per_page.'">';
      foreach ( $posts as $news ) {
         $post_thumbnail_id = get_post_meta( $news->ID, '_thumbnail_id', true );
+	$thumbnail_url = get_the_post_thumbnail_url( $blog->ID, 'full' );  // get thumbnail url instead of thumbnail
         $html .= '<div class="news_item item-'.$news->ID.'">';
            $html .= '<a  class="news_thumblink" href="'.get_permalink($news->ID).'"><div class="elementor-post__thumbnail elementor-fit-height zoom-in">'.get_the_post_thumbnail( $news->ID, $post_thumbnail_id ).'</div></a>';
             $html .= '<div class="title"><h3><a href="'.get_permalink($news->ID).'">'.limitStringDisplay($news->post_title,35).'</a></h3></div>';
