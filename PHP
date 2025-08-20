@@ -1,0 +1,17 @@
+<?php
+$data = [
+    "BLP" => [
+        "id" => 1281,
+        "model_number" => 1111,
+        "position" => 0
+    ],
+    "CLL" => [
+        "id" => 1282,
+        "model_number" => 1111,
+        "position" => 1
+    ]
+];
+
+foreach ($data as $key => $row) {
+    echo $key . ", " . $row['id'] . ", " . $row['model_number'] . ", " . $row['position'] . "\n";
+}
