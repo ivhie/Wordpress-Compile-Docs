@@ -1,3 +1,71 @@
+
+------------ QUERY SINGLE FEATURED CASE STUDY / OR ANY POST TYPE
+// display top banner latest featured case study
+add_shortcode('featured-casestudy', 'featured_casestudy');
+function featured_casestudy($atts){ 
+    ob_start();
+    // avoid buffering
+    // The Query
+        $args = array(
+                'post_type' => 'post',
+                'post_status' => 'publish',
+                'posts_per_page'=>1,
+                'order'=>'DESC',
+                'category_name' => 'case-studies',
+                'meta_query' => array(
+                        array(
+                        'key' => 'is_featured_case_studies',
+                        'value' => '1',
+                        ),
+                    ), // I used true false option instead of checkbox field
+
+        );
+
+        $atts = shortcode_atts(array(
+            'display' => '',
+        ), $atts, 'featured-casestudy');
+
+
+
+        $the_query = new WP_Query( $args );
+        $posts = $the_query->posts;
+
+        $display = esc_html($atts['display']);
+        $html = '';
+
+        if($display == 'post_title'){ //[featured-casestudy display="post_title"]
+
+            $html = $posts[0]->post_title;
+
+        } else if ($display == 'post_excerpt' ) { //[featured-casestudy display="post_excerpt"]
+
+            $html = limitStringDisplay($posts[0]->post_excerpt,170);
+
+        }  else if ($display == 'permalink' ) { //[featured-casestudy display="permalink"]
+
+            $html = get_permalink($posts[0]->ID);
+
+        }  else if ($display == 'post-thumbnail' ) { //[featured-casestudy display="post-thumbnail"]
+            
+            $html = get_the_post_thumbnail_url( $posts[0]->ID , 'post-thumbnail' );
+
+        } else if ($display == 'testimonial_message' ) { //[featured-casestudy display="testimonial_message"]
+
+            $html = get_post_meta($posts[0]->ID,'testimonial_message',true);
+
+        }  else if ($display == 'customer_name_company_name' ) { //[featured-casestudy display="customer_name_company_name"]
+
+            $html = get_post_meta($posts[0]->ID,'customer_name_company_name',true);
+        }
+   
+   ob_end_clean(); // avoid buffering
+	return $html;
+}
+
+
+
+
+
 //How to query post by feature post
 
 // display top banner latest featured post
