@@ -1,0 +1,123 @@
+<style>
+.tell_us_dropdown {
+  position: relative;
+  display: inline-block;
+   width: 100%;
+  max-width:440px;
+}
+
+.tell_us_dropdown > ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.tell_us_dropdown > ul > li {
+
+  box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.15);
+  height: 48px;
+      padding: 6px 15px 6px 25px !important;
+  cursor: pointer;
+  background-color: #ffffff;
+  border-color: #F6F6F6;
+  border-width: 1px 1px 1px 1px;
+  display:block; 
+  width: 100%;
+ background-image:url('/wp-content/uploads/2025/08/arrow_forward_ios.png');
+ background-repeat:no-repeat;
+ background-position: 95% 50%;
+ align-items: center;
+ display: flex;
+ color: #BABABA;
+font-size: 16px;
+font-style: normal;
+font-weight: 600;
+ 
+}
+
+
+.tell_us_dropdown ul ul {
+  display: none; /* hide sublist */
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  border-color: #F6F6F6;
+  border-width: 1px 1px 1px 1px;
+  background: #fff;
+  z-index: 1;
+   box-shadow: 0 4px 10px 0 rgba(0, 0, 0, 0.15);
+   padding: 20px;
+   list-style: none;
+}
+
+.tell_us_dropdown ul ul li {
+  border-bottom: 0px solid #ddd;
+ 
+  font-weight: 600;
+
+margin-bottom: 7px;
+    margin-top: 1px;
+}
+.tell_us_dropdown ul ul li a {
+    color:#000;
+    text-decoration:none;
+    column-gap: 15px;
+    display:flex;
+    align-items: center;
+}
+.tell_us_dropdown ul ul li:last-child {
+  border-bottom: none;
+}
+
+/* Show tell_us_dropdown on hover */
+.tell_us_dropdown:hover ul ul {
+  display: block;
+}
+
+#selected-value {
+    display: flex;
+    align-items: center;
+    column-gap: 10px;
+}
+
+</style>
+
+<div class="tell_us_dropdown">
+  <ul>
+    <li>
+      <span id="selected-value">Select One</span>
+      <ul id="dropdown_solution_list">
+        <li><a href="#" data-url="https://dynamic.ituldev.com/solutions/itad/"><img src="/wp-content/uploads/2025/08/verified_svgrepo.com_.png" alt=""/>IT Asset Disposition</a></li>
+        <li><a href="#" data-url="https://dynamic.ituldev.com/solutions/itad/data-center-solutions/"><img src="/wp-content/uploads/2025/08/enterprise_svgrepo.com-3.png" alt=""/>Data Center Solutions</a></li>
+		<li><a href="#" data-url="https://dynamic.ituldev.com/solutions/electronics-recycling/"><img src="/wp-content/uploads/2025/08/environment-botany-foliage-forest_svgrepo.com_-1.png" alt=""/>E-Recycling</a></li>
+        <li><a href="#" data-url="https://dynamic.ituldev.com/solutions/materials-recovery/"><img src="/wp-content/uploads/2025/08/devices_other-1.png" alt=""/>Materails Recovery</a></li>
+		<li><a href="#" data-url=""><img src="/wp-content/uploads/2025/08/Frame-422-1.png" alt=""/>OEM Compliance</a></li>
+		<li><a href="#" data-url=""><img src="/wp-content/uploads/2025/08/eco-1.png" alt=""/>Sustainability</a></li>
+      </ul>
+    </li>
+  </ul>
+</div>
+
+<script>
+jQuery(document).ready(function () {
+
+  jQuery("#dropdown_solution_list li a").on("click", function (e) {
+  
+    e.preventDefault();
+    // remove highlight from all
+   // jQuery("#custom-select li").removeClass("selected");
+
+    // highlight the clicked one
+    jQuery(this).addClass("selected");
+
+    // update display (optional)
+    let url = jQuery(this).data("url");
+    jQuery("#selected-value").html(jQuery(this).html());
+	jQuery("#selected-value").css('color','#000');
+	jQuery("#solution_link_btn a").attr('href',url);
+	
+	
+  });
+});
+</script>
