@@ -71,14 +71,16 @@ margin-bottom: 7px;
 }
 
 /* Show tell_us_dropdown on hover */
+/*
 .tell_us_dropdown:hover ul ul {
   display: block;
 }
-
+*/
 #selected-value {
     display: flex;
     align-items: center;
     column-gap: 10px;
+	width:100%;
 }
 
 </style>
@@ -101,8 +103,13 @@ margin-bottom: 7px;
 
 <script>
 jQuery(document).ready(function () {
-
-  jQuery("#dropdown_solution_list li a").on("click", function (e) {
+   jQuery("#selected-value").on("click", function (e) {
+      e.preventDefault();
+      jQuery("#dropdown_solution_list").css('display','block');
+   
+   });
+   
+   jQuery("#dropdown_solution_list li a").on("click", function (e) {
   
     e.preventDefault();
     // remove highlight from all
@@ -116,8 +123,23 @@ jQuery(document).ready(function () {
     jQuery("#selected-value").html(jQuery(this).html());
 	jQuery("#selected-value").css('color','#000');
 	jQuery("#solution_link_btn a").attr('href',url);
+	jQuery("#dropdown_solution_list").css('display','none');
 	
 	
-  });
+   });
+   
+    //Combine both (mouseout + click outside)
+    jQuery(document).on("mouseup", function(e) {
+      if (!jQuery(e.target).closest("#dropdown_solution_list").length) {
+              jQuery("#dropdown_solution_list").css('display','none');
+		}
+	});
+
+	jQuery("#dropdown_solution_list").on("mouseleave", function() {
+		 jQuery("#dropdown_solution_list").css('display','none');
+	});
+   
+   
+   
 });
 </script>
