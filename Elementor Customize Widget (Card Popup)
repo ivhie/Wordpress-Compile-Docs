@@ -1,0 +1,408 @@
+<?php
+
+/* Style  */
+add_action( 'elementor/editor/after_enqueue_styles', function() {
+    wp_add_inline_style( 'elementor-editor', '
+        .card_listing_btn .elementor-repeater-row-item-title  {
+            height: 100px !important;
+            
+			display: flex;
+			column-gap:10px;
+			font-weight: 600;
+        }
+
+		 .card_listing_btn .elementor-repeater-row-item-title img  {
+             border:1px solid #333;
+        }
+
+    ' );
+});
+
+class CardPopup extends \Elementor\Widget_Base {
+
+	public function get_name(): string {
+		return 'card_1';
+	}
+
+	public function get_title(): string {
+		return esc_html__( 'Card Template', 'elementor-addon' );
+	}
+
+	public function get_icon(): string {
+		return 'eicon-image-box';
+	}
+
+	public function get_categories(): array {
+		return [ 'basic' ];
+	}
+
+	public function get_keywords(): array {
+		return [ 'solution-card', 'card' ];
+	}
+
+	protected function register_controls(): void {
+
+		// Content Tab Start
+
+		$this->start_controls_section(
+			'section_title',
+			[
+				'label' => esc_html__( 'Industry Card (Pop-up)', 'elementor-addon' ),
+				'tab' => \Elementor\Controls_Manager::TAB_CONTENT,
+			]
+		);
+
+		/*
+		$this->add_control(
+			'title',
+			[
+				'label' => esc_html__( 'Title', 'elementor-addon' ),
+				'type' => \Elementor\Controls_Manager::TEXTAREA,
+				'default' => esc_html__( 'Hello world', 'elementor-addon' ),
+			]
+		);
+        */
+
+		$this->add_control(
+			'card_image',
+			[
+				'label' => esc_html__( 'Global Card Image', 'elementor-addon' ),
+				'type' => \Elementor\Controls_Manager::MEDIA,
+				'show_label' => true,
+				'default' => [],
+			]
+		);
+
+		$this->add_control(
+			'card_arrow_icon',
+			[
+				'label' => esc_html__( 'Global Arrow Icon', 'elementor-addon' ),
+				'type' => \Elementor\Controls_Manager::MEDIA,
+				'show_label' => true,
+				'default' => [],
+			]
+		);
+
+
+		/* Repeater */
+		$card = new \Elementor\Repeater();
+
+		$card->add_control(
+			'fullview_image',
+			[
+				'label' => esc_html__( 'Full View Image', 'elementor-addon' ),
+				'type' => \Elementor\Controls_Manager::MEDIA,
+				'show_label' => true,
+				'default' => [],
+			]
+		);
+       
+		$card->add_control(
+			'title_spacing',
+			[
+				'label' => esc_html__( 'Title Top Spacing', 'textdomain' ),
+				'type' => \Elementor\Controls_Manager::NUMBER,
+				'min' => 0,
+				'max' => 100,
+				'default' => 8,
+			]
+		);
+
+		$card->add_control(
+			'card_title',
+			[
+				'label' => esc_html__( 'Title', 'elementor-addon' ),
+				'type' => \Elementor\Controls_Manager::TEXT,
+				//'default' => esc_html__( 'Title' , 'elementor-addon' ),
+				'placeholder' => esc_html__( 'Title' , 'elementor-addon' ),
+				'label_block' => true,
+			]
+		);
+
+		$card->add_control(
+			'card_excerpt',
+			[
+				'label' => esc_html__( 'Excerpt', 'elementor-addon' ),
+				'type' => \Elementor\Controls_Manager::TEXT,
+				'placeholder' => esc_html__( 'Excerpt' , 'elementor-addon' ),
+				'label_block' => true,
+			]
+		);
+
+		$card->add_control(
+			'card_description',
+			[
+				'label' => esc_html__( 'Full Description', 'elementor-addon' ),
+				'type' => \Elementor\Controls_Manager::WYSIWYG,
+				'placeholder' => esc_html__( 'Description' , 'elementor-addon' ),
+				'label_block' => true,
+			]
+		);
+
+		
+
+		/*
+		$card->add_control(
+			'card_url',
+			[
+				'label' => esc_html__( 'Link', 'elementor-addon' ),
+				'type' => \Elementor\Controls_Manager::TEXT,
+				//'default' => esc_html__( '' , 'elementor-addon' ),
+				'label_block' => true,
+			]
+		);
+		*/
+
+		$this->add_control(
+			'card_list',
+			[
+				'label' => esc_html__( 'Card Listing', 'textdomain' ),
+				'classes' => 'card_listing_btn',
+				'type' => \Elementor\Controls_Manager::REPEATER,
+				'fields' => $card->get_controls(),
+				'title_field' => '<img width="100px;" src="{{{ fullview_image.url }}}" alt=""/> {{{ card_title }}} ',
+			]
+		);
+
+		$this->end_controls_section();
+
+		// Content Tab End
+
+
+		// Style Tab Start
+       /*
+		$this->start_controls_section(
+			'section_title_style',
+			[
+				'label' => esc_html__( 'Title', 'elementor-addon' ),
+				'tab' => \Elementor\Controls_Manager::TAB_STYLE,
+			]
+		);
+       
+		
+		$this->add_control(
+			'title_color',
+			[
+				'label' => esc_html__( 'Text Color', 'elementor-addon' ),
+				'type' => \Elementor\Controls_Manager::COLOR,
+				'selectors' => [
+					'{{WRAPPER}} .card-title' => 'color: {{VALUE}};',
+				],
+			]
+		);
+        */
+		//$this->end_controls_section();
+
+		// Style Tab End
+
+	}
+
+	protected function render(): void {
+		$settings = $this->get_settings_for_display();
+
+		if ( empty( $settings['card_list'] ) ) {
+			return;
+		}
+		?>
+		<style>
+           .card_1_listing { 
+			padding: 0px; 
+			margin: 0px; 
+			display: grid;
+  			grid-template-columns: repeat(3, 1fr); /* 3 equal columns */
+			column-gap:35px;
+		
+		  }
+		   .card_1_listing li {
+				border-radius: 12px;
+				box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.15);
+				padding-top: 60px;
+				padding-bottom: 20px;
+				padding-left: 25px;
+				padding-right: 25px;
+				background-color: #FFFFFF;
+				display:flex;
+				column-gap:16px;
+				margin-bottom:30px;
+				transition: all 0.4s ease-out;
+				height:200px;
+		    }
+			
+			.card_1_listing li .icon {
+				width: 100%;
+				max-width: 59px;
+				display: block;
+			}
+
+			.card_1_listing h3 {
+			    	color:  #333;
+					font-size: 20px;
+					font-style: normal;
+					font-weight: 600;
+					line-height: 125%; /* 25px */
+					letter-spacing: -0.4px;
+					margin-bottom: 6px;
+			}
+			
+			.card_1_listing .text p { margin-bottom: 0px; display:none; }
+			.card_1_listing .text a { display: flex; justify-content: end; display:none; }
+
+
+			.card_1_listing li:hover {
+				background-color:	#F5F7FF;
+				padding-top: 25px;
+			}
+			.card_1_listing li:hover h3 { color:#000; }
+			.card_1_listing  li:hover .text p,
+			.card_1_listing  li:hover .text a { display:flex; }
+			.card_1_listing .full_description { display:none; }
+
+			/* Mobile */
+           @media screen and (max-width: 1067px) {
+				.card_1_listing { 
+					grid-template-columns: repeat(2, 1fr); /* 3 equal columns */
+				}
+			}
+
+		    @media screen and (max-width: 690px) {
+				.card_1_listing { 
+					grid-template-columns: repeat(1, 1fr); /* 3 equal columns */
+				}
+			}
+
+
+
+		</style>
+		<ul class="card_1_listing">
+			<?php foreach (  $settings['card_list'] as $item ) { ?>
+				<li class="card_item" id="card_item_id_<?php echo esc_attr( $item['_id'] ); ?>">
+					<div class="icon">
+						<img  src="<?php echo esc_attr( $settings['card_image']['url'] ); ?>" alt="" />
+					</div>
+					<div class="text">
+						<h3 style="margin-top:<?php echo esc_attr( $item['title_spacing']); ?>px;" id="card_title_<?php echo esc_attr( $item['_id'] ); ?>"><?php echo wp_kses_post( $item['card_title'] ); ?></h3>
+						<p><?php echo esc_attr( $item['card_excerpt'] ); ?></p>
+						<a href="#" class="open_card_popup"  data-image_url="<?php echo esc_attr( $item['fullview_image']['url'] ); ?>"  data-id="<?php echo esc_attr( $item['_id'] ); ?>"><img src="<?php echo esc_attr( $settings['card_arrow_icon']['url'] ); ?>" alt="" /></a>
+						<div class="full_description"  id="full_description_<?php echo esc_attr( $item['_id'] ); ?>" ><?php echo wp_kses_post( $item['card_description'] ); ?></div>
+						
+					</div>
+
+				</li>
+			<?php } ?>
+
+		</ul>
+
+		<script>
+			/*
+			jQuery(document).ready(function() {
+                 // data-popup-id="7850"
+				jQuery('.open_card_popup').on('click', function (e) {
+					e.preventDefault();
+					var popupID = jQuery(this).data('popup-id');
+
+					//alert(jQuery(this).data('image_url'));
+					//alert(jQuery('#card_title_'+jQuery(this).data('id')).html());
+					//alert(popupID);
+					
+
+					jQuery('#industry_popup_img img').attr('src',jQuery(this).data('image_url'));
+					jQuery('#industry_popup_title .elementor-heading-title').text('tester1');
+					jQuery('#title_me').text('tester1');
+					
+					//jQuery("#industry_popup_title .elementor-heading-title").html('tester2');
+					//jQuery("#industry_popup_title .elementor-heading-title").val('tester3');
+					//jQuery("#industry_popup_content").html('display','block');
+					
+					//elementorProFrontend.modules.popup.showPopup({ id: popupID });
+					if (window.elementorProFrontend && popupID) {
+						elementorProFrontend.modules.popup.show({ popupID });
+					}
+					
+				
+				});
+
+			});
+            */
+			jQuery(function ($) {
+				// <a class="open-popup" data-popup-id="123">Open</a>
+				jQuery(window).on('elementor/frontend/init', function() {
+					$(document).on('click', '.open_card_popup', function (e) {
+						e.preventDefault();
+						//const id = $(this).data('popup-id'); // Elementor Popup (template) ID
+						//if (window.elementorProFrontend && id) {
+					    if (window.elementorProFrontend) {
+						    //jQuery('#title_me').text('tester1');
+							img_url = jQuery(this).data('image_url');
+							//jQuery('#industry_popup_img .attachment-large').attr('src',jQuery(this).data('image_url'));
+							jQuery('#industry_popup_img').html('<img width="568" height="469" src="'+img_url+'" class="attachment-large size-large wp-image-1074" alt=""  sizes="(max-width: 568px) 100vw, 568px">');
+							jQuery('#industry_popup_title .elementor-heading-title').text(jQuery('#card_title_'+jQuery(this).data('id')).html().replace(/<br\s*\/?>/gi, " "));
+							jQuery("#industry_popup_content").html('');
+                            jQuery("#industry_popup_content").append(jQuery('#full_description_'+jQuery(this).data('id')).html());
+						
+						//elementorProFrontend.modules.popup.show({ id });
+						}
+					});
+				});
+			});
+
+            
+		</script>
+		<?php
+	}
+
+	protected function content_template(): void {
+	   // this would serve as a preview on elementor backend
+	   /*
+	    $settings = $this->get_settings_for_display();
+
+		if ( empty( $settings['card_list'] ) ) {
+			return;
+		}
+		?>
+		
+		<ul class="card_1_listing">
+			<?php foreach (  $settings['card_list'] as $item ) { ?>
+				<li class="card_item" id="card_item_id_<?php echo esc_attr( $item['_id'] ); ?>">
+					<div class="icon">
+						<img  src="<?php echo esc_attr( $settings['card_image']['url'] ); ?>" alt="" />
+					</div>
+					<div class="text">
+						<h3 style="margin-top:<?php echo esc_attr( $item['title_spacing']); ?>px;" id="card_title_<?php echo esc_attr( $item['_id'] ); ?>"><?php echo wp_kses_post( $item['card_title'] ); ?></h3>
+						<p><?php echo esc_attr( $item['card_excerpt'] ); ?></p>
+						<a href="#" class="open_card_popup"  data-image_url="<?php echo esc_attr( $item['fullview_image']['url'] ); ?>"  data-id="<?php echo esc_attr( $item['_id'] ); ?>"><img src="<?php echo esc_attr( $settings['card_arrow_icon']['url'] ); ?>" alt="" /></a>
+					</div>
+
+				</li>
+			<?php } ?>
+
+		</ul>
+		<?php*/
+		?>
+			<# if ( settings.card_list.length ) { #>
+			<ul class="card_1_listing">
+			<# _.each( settings.list, function( item ) { #>
+				<dt class="elementor-repeater-item-{{ item._id }}">{{{ item.list_title }}}</dt>
+				<dd>{{{ item.list_content }}}</dd>
+                
+				
+				<li class="card_item" id="card_item_id_{{ item._id }}">
+					<div class="icon">
+						<img  src="{{ item.card_image.url }}" alt="" />
+					</div>
+					<div class="text">
+						<h3 style="margin-top:{{ item.title_spacing }}px;" id="card_title_{{ item._id }}">{{{ item.card_title }}}</h3>
+						<p>{{{ item.card_excerpt }}}</p>
+						<a href="#" class="open_card_popup"  data-image_url="{{ item.fullview_image.url }}"  data-id="{{ item._id }}"><img src="{{ item.card_arrow_icon.url }}" alt="" /></a>
+					</div>
+
+				</li>
+
+
+			<# }); #>
+			</ul>
+		<# } #>
+		<?php
+	}
+
+
+}
