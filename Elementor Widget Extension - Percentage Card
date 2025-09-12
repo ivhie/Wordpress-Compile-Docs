@@ -1,0 +1,306 @@
+
+/* Add this on function.php */
+/* Elementor Widget */
+function register_elementor_custom_extend_widget( $widgets_manager ) {
+    require_once('elementor/widget/card-percentage-score/index.php' );
+    $widgets_manager->register( new \CardPercentageScore() );
+}
+
+add_action( 'elementor/widgets/register', 'register_elementor_custom_extend_widget' );
+
+<?php
+/* Create file widget name : cardpercentage/index.php*/
+class CardPercentageScore extends \Elementor\Widget_Base {
+
+	public function get_name(): string {
+		return 'card_percentage_score';
+	}
+
+	public function get_title(): string {
+		return esc_html__( 'Card Percentage', 'elementor-addon' );
+	}
+
+	public function get_icon(): string {
+		return 'eicon-image-box';
+	}
+
+	public function get_categories(): array {
+		return [ 'basic' ];
+	}
+
+	public function get_keywords(): array {
+		return [ 'percentage-card', 'card' ];
+	}
+
+	protected function register_controls(): void {
+
+		// Content Tab Start
+
+		$this->start_controls_section(
+			'section_title',
+			[
+				'label' => esc_html__( 'Home Percentage Card', 'elementor-addon' ),
+				'tab' => \Elementor\Controls_Manager::TAB_CONTENT,
+			]
+		);
+
+		
+		$this->add_control(
+			'title',
+			[
+				'label' => esc_html__( 'Title', 'elementor-addon' ),
+				'type' => \Elementor\Controls_Manager::TEXT,
+				'default' => esc_html__( 'Title', 'elementor-addon' ),
+				'placeholder' => esc_html__( '', 'elementor-addon' ),
+			]
+		);
+
+		$this->add_control(
+			'description',
+			[
+				'label' => esc_html__( 'Description', 'elementor-addon' ),
+				'type' => \Elementor\Controls_Manager::TEXT,
+				'default' => esc_html__( 'Description', 'elementor-addon' ),
+				'placeholder' => esc_html__( '', 'elementor-addon' ),
+			]
+		);
+        
+
+      $this->add_control(
+			'inner_number',
+			[
+				'label' => esc_html__( 'Inner Cicle Number', 'elementor-addon' ),
+				'type' => \Elementor\Controls_Manager::TEXT,
+				'default' => esc_html__( 'Number', 'elementor-addon' ),
+				'placeholder' => esc_html__( '', 'elementor-addon' ),
+			]
+		);
+
+		 $this->add_control(
+			'inner_text',
+			[
+				'label' => esc_html__( 'Inner Cicle Text', 'elementor-addon' ),
+				'type' => \Elementor\Controls_Manager::TEXT,
+				'default' => esc_html__( 'Cicle Text', 'elementor-addon' ),
+				'placeholder' => esc_html__( '', 'elementor-addon' ),
+			]
+		);
+
+
+		$this->add_control(
+			'inner_color',
+			[
+				'label' => esc_html__( 'Circle, Number & Text Title Color', 'elementor-addon' ),
+				'type' => \Elementor\Controls_Manager::COLOR,
+				'selectors' => [
+					'{{WRAPPER}} .your-class' => 'color: {{VALUE}}',
+				],
+			]
+		);
+
+		/*
+		$this->add_control(
+			'card_background',
+			[
+				'label' => esc_html__( 'Card Background', 'elementor-addon' ),
+				'type' => \Elementor\Controls_Manager::MEDIA,
+				'show_label' => true,
+				'default' => [],
+			]
+		);
+		*/
+
+		$this->end_controls_section();
+
+		// Content Tab End
+
+
+		// Style Tab Start
+       
+		$this->start_controls_section(
+			'additional_settings',
+			[
+				'label' => esc_html__( 'Additional Settings', 'elementor-addon' ),
+				'tab' => \Elementor\Controls_Manager::TAB_CONTENT,
+			]
+		);
+       
+		
+		$this->add_control(
+			'title_color',
+			[
+				'label' => esc_html__( 'Text Color', 'elementor-addon' ),
+				'type' => \Elementor\Controls_Manager::COLOR,
+				'selectors' => [
+					'{{WRAPPER}} .card-title' => 'color: {{VALUE}};',
+				],
+			]
+		);
+        
+		//$this->end_controls_section();
+
+		// Style Tab End
+
+	}
+
+	protected function render(): void {
+		$settings = $this->get_settings_for_display();
+
+		if ( empty( $settings['title'] ) ) {
+			return;
+		}
+		?>
+		<style>
+		/* Homepage Card Score */
+		
+  .card_score { 
+			max-width:580px; 
+			width:100%; 
+			display:flex; 
+			column-gap: 15px;  
+			border-radius: 30px; 
+			padding: 40px 30px 45px; 
+		}
+		 .card_score .score_left .circle_div { 
+			width: 206px;
+			height: 206px;
+			position:relative; 
+		 }
+        .card_score .score_left  .circle_div h3 { 
+			position:absolute;
+		 	font-family: "Figtree", Sans-serif;
+			font-size: 66px;
+			font-weight: 700;
+			line-height: 21.973px;
+			letter-spacing: -1.309px;
+			top: 60px;
+			width: 206px;
+			text-align: center;
+			
+		}
+
+		.card_score .score_left  .circle_div p { 
+			position:absolute;
+		    font-size: 16px;
+			font-weight: 800;
+			text-transform: uppercase;
+			line-height: 21.973px;
+			color: #FFFFFF;
+			top: 120px;
+			width: 206px;
+			text-align: center;
+
+		}
+		.card_score .score_right {
+             align-content: center;
+		}
+   
+		.card_score .score_right h3 {
+			  	font-size: 28px;
+				font-weight: 800;
+				text-transform: uppercase;
+				line-height: 28px;
+				margin-bottom: 7px;
+		}
+		.card_score .score_right p {
+				text-align: left;
+				font-size: 19px;
+				line-height: 21px;
+				color: #FFFFFF;
+		}
+
+		@media screen and (max-width: 1300px) {
+				.card_score {
+					padding: 40px 10px 45px;
+				}
+				.card_score .score_right h3 {
+					font-size: 22px;
+					line-height:22px;
+				}
+
+		}
+
+		@media screen and (max-width: 1200px) {
+
+				.card_score .score_right h3 {
+					font-size: 18px;
+					line-height:18px;
+				}
+				.card_score .score_right p { font-size: 16px;
+				line-height:18px; }
+
+		}
+
+		@media screen and (max-width: 1024px) {
+              .card_score { max-width : 100%; column-gap: 35px;  }
+			  .card_score .score_right h3 { font-size:28px; line-height:28px; }
+			  .card_score .score_right p  { font-size:19px; line-height:19px; }
+			
+		}
+
+		@media screen and (max-width: 600px) {
+              .card_score { display:block;  }
+			  .card_score .score_left .circle_div { margin: 0 auto 20px;}
+			  .card_score .score_right h3 { text-align:center; margin-bottom:20px; }
+			  .card_score .score_right p  { text-align:center; }
+			
+		}
+		
+		</style>
+
+        <div class="card_score background-gradient-spear">
+			<div class="score_left">
+				<div class="circle_div">
+					<svg xmlns="http://www.w3.org/2000/svg" width="206" height="206" viewBox="0 0 206 206" fill="none">
+						<path opacity="0.2" d="M0.805222 102.943C0.805222 159.482 46.6389 205.316 103.178 205.316C159.716 205.316 205.55 159.482 205.55 102.943C205.55 46.4045 159.716 0.570801 103.178 0.570801C46.6389 0.570801 0.805222 46.4045 0.805222 102.943ZM192.242 102.943C192.242 152.132 152.366 192.007 103.178 192.007C53.989 192.007 14.1136 152.132 14.1136 102.943C14.1136 53.7546 53.989 13.8792 103.178 13.8792C152.366 13.8792 192.242 53.7546 192.242 102.943Z" fill="<?php echo esc_attr( $settings['inner_color'] ); ?>"/>
+							<mask id="path-2-inside-1_312_2415" fill="white">
+								<path d="M7.45943 102.943C3.78441 102.943 0.782684 105.926 1.02132 109.593C2.3988 130.761 10.3264 151.041 23.7883 167.576C38.6544 185.837 59.3607 198.414 82.4179 203.189C105.475 207.964 129.473 204.644 150.369 193.79C171.264 182.936 187.779 165.21 197.131 143.6C206.482 121.99 208.098 97.8176 201.707 75.1553C195.315 52.4929 181.307 32.7266 162.042 19.1873C142.778 5.64797 119.435 -0.836563 95.9474 0.826445C74.6784 2.33237 54.4681 10.436 38.0943 23.9224C35.2576 26.2589 35.1383 30.4887 37.6541 33.1677C40.1698 35.8466 44.3665 35.957 47.2257 33.6482C61.3504 22.2429 78.6726 15.3913 96.8874 14.1016C117.322 12.6548 137.63 18.2964 154.39 30.0755C171.15 41.8547 183.337 59.0514 188.898 78.7677C194.458 98.4839 193.052 119.514 184.917 138.315C176.781 157.115 162.413 172.537 144.234 181.98C126.055 191.423 105.176 194.311 85.1166 190.157C65.0569 186.003 47.0424 175.06 34.1089 159.174C22.5802 145.013 15.7169 127.696 14.362 109.592C14.0878 105.927 11.1344 102.943 7.45943 102.943Z"/>
+							</mask>
+						<path d="M7.45943 102.943C3.78441 102.943 0.782684 105.926 1.02132 109.593C2.3988 130.761 10.3264 151.041 23.7883 167.576C38.6544 185.837 59.3607 198.414 82.4179 203.189C105.475 207.964 129.473 204.644 150.369 193.79C171.264 182.936 187.779 165.21 197.131 143.6C206.482 121.99 208.098 97.8176 201.707 75.1553C195.315 52.4929 181.307 32.7266 162.042 19.1873C142.778 5.64797 119.435 -0.836563 95.9474 0.826445C74.6784 2.33237 54.4681 10.436 38.0943 23.9224C35.2576 26.2589 35.1383 30.4887 37.6541 33.1677C40.1698 35.8466 44.3665 35.957 47.2257 33.6482C61.3504 22.2429 78.6726 15.3913 96.8874 14.1016C117.322 12.6548 137.63 18.2964 154.39 30.0755C171.15 41.8547 183.337 59.0514 188.898 78.7677C194.458 98.4839 193.052 119.514 184.917 138.315C176.781 157.115 162.413 172.537 144.234 181.98C126.055 191.423 105.176 194.311 85.1166 190.157C65.0569 186.003 47.0424 175.06 34.1089 159.174C22.5802 145.013 15.7169 127.696 14.362 109.592C14.0878 105.927 11.1344 102.943 7.45943 102.943Z" stroke="<?php echo esc_attr( $settings['inner_color'] ); ?>" stroke-width="31.9602" stroke-linecap="round" mask="url(#path-2-inside-1_312_2415)"/>
+					</svg>
+					<h3 style="color:<?php echo esc_attr( $settings['inner_color'] ); ?>"><?php echo esc_attr( $settings['inner_number'] ); ?></h3>
+					<p><?php echo wp_kses_post( $settings['inner_text'] ); ?></p>
+				</div>
+			</div>
+			<div class="score_right">
+                 <h3 style="color:<?php echo esc_attr( $settings['inner_color'] ); ?>"><?php echo wp_kses_post( $settings['title'] ); ?></h3>
+				 <p><?php echo wp_kses_post( $settings['description'] ); ?></p>
+			</div>
+		</div>
+		
+		<?php
+	}
+
+	protected function content_template(): void {
+		?>
+
+		<#
+		if ( '' === settings.title ) {
+			return;
+		}
+		#>
+        <!--<h3>Percentage Score<h3>-->
+		<div class="card_score background-gradient-spear">
+			<div class="score_left">
+				<div class="circle_div">
+					<svg xmlns="http://www.w3.org/2000/svg" width="206" height="206" viewBox="0 0 206 206" fill="none">
+						<path opacity="0.2" d="M0.805222 102.943C0.805222 159.482 46.6389 205.316 103.178 205.316C159.716 205.316 205.55 159.482 205.55 102.943C205.55 46.4045 159.716 0.570801 103.178 0.570801C46.6389 0.570801 0.805222 46.4045 0.805222 102.943ZM192.242 102.943C192.242 152.132 152.366 192.007 103.178 192.007C53.989 192.007 14.1136 152.132 14.1136 102.943C14.1136 53.7546 53.989 13.8792 103.178 13.8792C152.366 13.8792 192.242 53.7546 192.242 102.943Z" fill="{{ settings.inner_color }}"/>
+							<mask id="path-2-inside-1_312_2415" fill="white">
+								<path d="M7.45943 102.943C3.78441 102.943 0.782684 105.926 1.02132 109.593C2.3988 130.761 10.3264 151.041 23.7883 167.576C38.6544 185.837 59.3607 198.414 82.4179 203.189C105.475 207.964 129.473 204.644 150.369 193.79C171.264 182.936 187.779 165.21 197.131 143.6C206.482 121.99 208.098 97.8176 201.707 75.1553C195.315 52.4929 181.307 32.7266 162.042 19.1873C142.778 5.64797 119.435 -0.836563 95.9474 0.826445C74.6784 2.33237 54.4681 10.436 38.0943 23.9224C35.2576 26.2589 35.1383 30.4887 37.6541 33.1677C40.1698 35.8466 44.3665 35.957 47.2257 33.6482C61.3504 22.2429 78.6726 15.3913 96.8874 14.1016C117.322 12.6548 137.63 18.2964 154.39 30.0755C171.15 41.8547 183.337 59.0514 188.898 78.7677C194.458 98.4839 193.052 119.514 184.917 138.315C176.781 157.115 162.413 172.537 144.234 181.98C126.055 191.423 105.176 194.311 85.1166 190.157C65.0569 186.003 47.0424 175.06 34.1089 159.174C22.5802 145.013 15.7169 127.696 14.362 109.592C14.0878 105.927 11.1344 102.943 7.45943 102.943Z"/>
+							</mask>
+						<path d="M7.45943 102.943C3.78441 102.943 0.782684 105.926 1.02132 109.593C2.3988 130.761 10.3264 151.041 23.7883 167.576C38.6544 185.837 59.3607 198.414 82.4179 203.189C105.475 207.964 129.473 204.644 150.369 193.79C171.264 182.936 187.779 165.21 197.131 143.6C206.482 121.99 208.098 97.8176 201.707 75.1553C195.315 52.4929 181.307 32.7266 162.042 19.1873C142.778 5.64797 119.435 -0.836563 95.9474 0.826445C74.6784 2.33237 54.4681 10.436 38.0943 23.9224C35.2576 26.2589 35.1383 30.4887 37.6541 33.1677C40.1698 35.8466 44.3665 35.957 47.2257 33.6482C61.3504 22.2429 78.6726 15.3913 96.8874 14.1016C117.322 12.6548 137.63 18.2964 154.39 30.0755C171.15 41.8547 183.337 59.0514 188.898 78.7677C194.458 98.4839 193.052 119.514 184.917 138.315C176.781 157.115 162.413 172.537 144.234 181.98C126.055 191.423 105.176 194.311 85.1166 190.157C65.0569 186.003 47.0424 175.06 34.1089 159.174C22.5802 145.013 15.7169 127.696 14.362 109.592C14.0878 105.927 11.1344 102.943 7.45943 102.943Z" stroke="{{ settings.inner_color }}" stroke-width="31.9602" stroke-linecap="round" mask="url(#path-2-inside-1_312_2415)"/>
+					</svg>
+					<h3 style="color:{{ settings.inner_color }}">{{{ settings.inner_number }}}</h3>
+					<p>{{{ settings.inner_text }}}</p>
+				</div>
+			</div>
+			<div class="score_right">
+                 <h3 style="color:{{ settings.inner_color }}">{{{ settings.title }}}</h3>
+				 <p>{{{ settings.description }}}</p>
+			</div>
+		</div>
+		<?php
+	}
+
+
+}
