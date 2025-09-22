@@ -1,0 +1,158 @@
+Style
+/* Container Podcast and blog pagination style */
+.custom-pagination {
+  text-align: center;
+  margin: 60px 0 20px;
+   display: flex;
+   justify-content: center;
+column-gap: 10px;
+}
+
+/* UL reset */
+.custom-pagination ul {
+  display: inline-flex;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* LI */
+.custom-pagination li {
+  display: inline-block;
+}
+
+/* Links */
+.custom-pagination a.page-numbers {
+     color: #333;
+     text-decoration: none;
+     display: flex;
+     align-items: center;
+     padding: 8px 14px;
+}
+.custom-pagination span {
+  display: flex;
+  align-items: center;
+  padding: 8px 14px;
+  border: 0px solid #ddd;
+  color: #333;
+  transition: all 0.3s ease;
+}
+
+/* Hover */
+.custom-pagination a.page-numbers:hover {
+  background: #75C043;
+  color: #fff;
+  border-color: #75C043;
+}
+
+/* Current page */
+.custom-pagination .current {
+  background: #75C043;
+  color: #fff;
+  border-color: #75C043;
+}
+
+/* Container Podcast and blog pagination style Ends here */
+
+
+
+
+/* Short Code */
+//Display blogs listing grid
+add_shortcode('blog-grid-listing', 'blog_grid_listing');
+function blog_grid_listing($atts){ 
+    global $post;
+
+    $atts = shortcode_atts(array(
+        'post_per_page' => '9',
+        'exclude_slug' => '',
+    ), $atts, 'blog-grid-listing');
+
+    ob_start();
+
+    $exclude_ids = post_get_category_by_slug($atts['exclude_slug']);
+    $posts_per_page = isset($atts['post_per_page'])?$atts['post_per_page']:'-1';
+    $paged = (get_query_var('paged')) ? get_query_var('paged') : 1;
+    //$paged = isset($_POST['paged'])?$_POST['paged'] : 1;
+    $cat_slug = isset($_GET['cat']) ? sanitize_text_field($_GET['cat']) : '';
+    $author_id = isset($_GET['author_id']) ? intval($_GET['author_id']) : 0;
+
+
+    $count_post_displayed = ( $posts_per_page * $paged );
+
+    $html  = '';
+     // The Query
+        $args = array(
+                'post_type' => 'post',
+                'post_status' => 'publish',
+                'posts_per_page'=>$posts_per_page,
+                'order'=>'DESC',
+                'paged' => $paged,
+                'category__not_in' => $exclude_ids
+        );
+
+    // If category param exists
+    if ($cat_slug) {
+        $args['tax_query'] = [
+            [
+                'taxonomy' => 'category',
+                'field'    => 'slug',
+                'terms'    => $cat_slug,
+            ],
+        ];
+    }
+   //get by author id
+    if(!empty($author_id)){ // check if cat is exist or has cat
+        $args['author'] = $author_id;
+    }
+
+
+
+    $the_query = new WP_Query( $args );
+    
+    $found_posts = ( $the_query->found_posts ) ? $the_query->found_posts : 0;
+    
+    $posts = $the_query->posts;
+    $html .= '<div id="blog_grid_listing" data-blog_url="'.get_permalink($post->ID).'" class="blog_grid_listing" exclude_slug="'.$atts['exclude_slug'].'" posts_per_page="'.$posts_per_page.'">';
+     foreach ( $posts as $blog ) {
+        $post_thumbnail_id = get_post_meta( $blog->ID, '_thumbnail_id', true );
+        $thumbnail_url = get_the_post_thumbnail_url( $blog->ID, 'full' ); 
+        $html .= '<div class="blog_item item-'.$blog->ID.'">';
+           $html .= '<a  class="blog_link" href="'.get_permalink($blog->ID).'">
+            <div class="elementor-post__thumbnail elementor-fit-height zoom-in" style="background-image:url('.$thumbnail_url.')">'.get_the_post_thumbnail( $blog->ID, $post_thumbnail_id ).'</div>
+           </a>';
+            $html .= '<div class="title"><h3><a href="'.get_permalink($blog->ID).'">'.limitStringDisplay($blog->post_title,65).'</a></h3></div>';
+            $html .= '<div class="except">'.limitStringDisplay($blog->post_excerpt,170).'</div>';
+            $html .= '<div class="continue"><a href="'.get_permalink($blog->ID).'" />Read More</div>';       
+        $html .= '</div>';
+     }
+     $html .= '</div>';
+  
+     if(  $found_posts > $count_post_displayed ){
+        // $html .= '<div class="loadmore-section"><a href="#" cat_id="" author_id=""  exclude_slug="'.$atts['exclude_slug'].'" tot_number_post="'.$found_posts.'" id="loadmore" page="'.$paged.'" class="lmore">Load More</a></div>';
+     }
+
+
+    $html .= '<div class="custom-pagination">';
+       
+         $html .= paginate_links( array(
+            'total'   => $the_query->max_num_pages,
+             'current' => $paged,
+             'mid_size'=>0,
+              //'current'   => max( 1, get_query_var('paged') ),
+             'show_all' => true,
+             'prev_text' => __('« Prev'),
+             'next_text' => __('Next »'),
+        ) );
+    
+    $html .= '</div>';
+    
+
+    ob_end_clean(); // avoid buffering
+	return $html;
+}
+
+add_filter( 'paginate_links_output', function( $output ) {
+    return str_replace( '&hellip;', '', $output );
+});
+
