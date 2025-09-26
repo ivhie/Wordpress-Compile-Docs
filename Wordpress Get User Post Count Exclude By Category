@@ -1,0 +1,89 @@
+function get_user_post_count_exclude_category( $user_id, $exclude_cat_ids = array() ) {
+    // Get posts by user
+    $args = array(
+        'author'         => $user_id,
+        'posts_per_page' => -1,
+        'fields'         => 'ids',
+        'post_status'    => 'publish',
+        'post_type'      => 'post',
+        'category__not_in' => $exclude_cat_ids, // Exclude categories
+    );
+
+    $query = new WP_Query( $args );
+
+    return $query->found_posts;
+}
+
+
+/* Display Search Form of Blog Section */
+add_shortcode('blog-search-form', 'blog_search_form');
+function blog_search_form($atts){ 
+
+    ob_start();
+    $atts = shortcode_atts(array(
+        'exclude_slug' => '0',
+    ), $atts, 'blog-search-form');
+   
+    $exclude_slugs = isset($atts['exclude_slug'])?explode(',', $atts['exclude_slug']):'0';
+    $exclude_ids = array();
+    if($exclude_slugs) {
+         foreach ( $exclude_slugs as $slug ) {
+            $cat = get_category_by_slug( $slug );
+            if ( $cat ) {
+                $exclude_ids[] = $cat->term_id;
+            }
+        }
+    }
+  
+
+
+    $categories = get_categories( array(
+        'hide_empty' => false,
+        'exclude' => $exclude_ids,
+        'orderby' => 'name',
+        'order'   => 'ASC',
+    ) );
+
+
+    $authors = get_users( array(
+        'role__in' => array( 'author', 'editor', 'administrator' ), // roles to include
+        'orderby'  => 'display_name',
+        'order'    => 'ASC'
+    ) );
+
+
+     
+    $html = '<div class="blog_search_wrap">';
+     $html .= '<form method="post" action="" class="filter_search_form" id="filter-search-form">';
+        $html .= '<label>Filter by</label>';
+        $html .= '<select class="cat_name" id="cat-name">';
+            $html .= '<option value="0">Category</option>';
+             $html .= '<option value="">All</option>';
+            foreach ($categories as $category) {
+                //$html .= '<option value="'.$category->cat_ID.'">'.$category->name.'</option>';
+                $html .= '<option value="'.$category->slug.'">'.$category->name.'</option>';
+            }
+        $html .= '</select>';
+        $html .= '<select class="author_name" id="author-name">';
+            $html .= '<option value="0">Author</option>';
+            foreach ($authors as $author) {
+                  //$post_count = count_user_posts( $author->ID, 'post', true );
+                  $post_count = get_user_post_count_exclude_category( $author->ID, $exclude_ids );
+                  if ( $post_count > 0 ) {
+                      $html .= '<option value="'.$author->ID.'">'.$author->display_name.'</option>';
+                  }
+            }
+        $html .= '</select>';
+     $html .= '</form>';
+    $html .= '</div>';
+
+    ob_end_clean(); // avoid buffering
+ 
+
+	return $html;
+
+}
+
+
+
+
