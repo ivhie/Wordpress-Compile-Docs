@@ -1,0 +1,236 @@
+<style>
+.primary_menu_level { padding:0; margin:0px; list-style:none; display:flex; column-gap: 0px;   }
+.primary_menu_level  li > a {
+	font-size: 20px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    padding: 3px 22px;
+    font-family: "Futura PT Light", Sans-serif;
+    color: #000;
+}
+.primary_menu_level > li:hover .second_menu_level,
+.second_menu_level > li:hover .third_menu_level {
+	/*display:flex;*/
+	transform: translateY(0);
+	opacity: 1;
+    visibility: visible;
+
+}
+.second_menu_level { 
+   
+	position:absolute;
+	width: 100vw;
+	list-style:none;
+	padding:43px 30px 43px;
+	background-color:#F6F6F6;
+	z-index:999;
+	justify-content:center;
+	left: 0;
+	column-gap: 40px;
+	border-top: 15px solid #fff;
+	
+}
+.second_menu_level > li { width:200px; align-items: center; }
+.second_menu_level  li.has_child:hover:after { z-index:999;content: ' '; position:absolute; bottom:8px;width:200px; height1px; border-bottom:8px solid #F6BC15; align-items: center;  }
+
+.second_menu_level > li > a{  
+	font-size: 17px;
+    text-transform: uppercase;
+    text-align: center;
+    display: flex;
+    line-height: 20px;
+    margin-bottom: 10px;
+    letter-spacing: 0px;
+    font-weight: 500;
+    font-family: "Futura PT Medium";
+ }
+.second_menu_level,
+.third_menu_level { 
+	display:flex;
+	opacity: 0;
+	visibility: hidden;
+    transition: all 0.3s ease;
+    /*transform: translateY(10px);*/
+	/*transition: 
+    opacity 0.3s ease-in-out,
+    transform 0.3s cubic-bezier(0.25, 1, 0.5, 1),
+    visibility 0.3s;*/
+
+}
+
+.third_menu_level { 
+   
+	position:absolute;
+	width: 100vw;
+	list-style:none;
+	padding:61px 30px 61px;
+	background-color:#fff;
+	z-index:999;
+	justify-content:center;
+	left: 0;
+	column-gap: 80px;
+	border-top: 30px solid #F6F6F6;
+}
+
+.third_menu_level > li { display :flex; column-gap:30px;    justify-content: center;
+    max-width: 402px; }
+.third_menu_level > li .third_left { 
+     min-width: 162px;
+     max-width: 162px;
+	 height:149px;
+     width: 100%;
+	 display: block;
+
+ }
+.third_menu_level > li .third_left img {width: 100%; height:100%; }
+.third_menu_level > li .third_right > a  { font-size:18px; line-height:20px; display:flex; text-align:left; margin-bottom:7px; font-family: "Futura PT Medium", Sans-serif;  }
+.fourth_menu_level { padding: 0px; display:flex; column-gap:30px; flex-wrap: wrap; list-style:none; }
+.fourth_menu_level > li {   
+	flex: 1 1 42%;   /* each item takes 50% of the row */
+    box-sizing: border-box; margin-bottom:1px; }
+.fourth_menu_level  > li a { padding: 0px; font-size:18px; font-weight:500;   letter-spacing: 0px;   font-family: "Futura PT Light", Sans-serif; }
+
+</style>
+
+/* PHP Script */
+
+
+function level4_custom_menu(){
+
+    ob_start();
+
+
+	$html = '';
+
+    $locations = get_nav_menu_locations();
+	$menu_id   = $locations['mobile-menu']; // Replace 'primary' with your theme location
+	//$menu = get_term($locations['mobile-menu'], 'nav_menu');
+	$menu_items = wp_get_nav_menu_items($menu_id);
+
+	$menu_items = array_filter($menu_items, function($item) {
+		return $item->menu_item_parent == 0; 
+	});
+	//$menu_items = wp_get_nav_menu_items($menu_id, array('post_parent' => 0));
+	//print_r($menu_items);
+	//var_dump($menu_items[1]->title);
+	//echo count($menu_items);
+	//foreach ($menu_items as $item ){
+         //echo  $item->title.'<br/>';
+	//}
+
+
+	$html .= '<ul class="primary_menu_level">'; // first level
+	foreach ($menu_items as $f_item ){
+		$html .= '<li>';
+			$html .= '<a href="'.$f_item->url.'" />'.$f_item->title .'</a>';
+
+            $f_parent_id = $f_item->ID;
+			$second_menu_items = wp_get_nav_menu_items($menu_id);
+			$second_menu_items = array_filter($second_menu_items, function($second_item) use ($f_parent_id) {
+				return $second_item->menu_item_parent == $f_parent_id; 
+			});
+
+			if($second_menu_items) {
+				$html .= '<ul class="second_menu_level" id="second_menu_level_'.$f_item->ID.'">'; // Second level
+				foreach ($second_menu_items as $s_item ){
+
+
+						$s_parent_id = $s_item->ID;
+						$third_menu_items = wp_get_nav_menu_items($menu_id);
+						//echo $s_parent_id;
+						$third_menu_items = array_filter($third_menu_items, function($third_item) use ($s_parent_id) {
+							return $third_item->menu_item_parent == $s_parent_id; 
+						});
+					
+					if ( $third_menu_items ) { 
+						$has_child = 'has_child';
+					} else {  $has_child = 'no_child'; }
+
+					$html .= '<li class="'.$has_child.'">';
+						$html .= '<a href="'.$s_item->url.'" />'.$s_item->title .'</a>';
+						$html .= '<a href="'.$s_item->url.'" />'._($s_item->description).'</a>';
+
+						
+
+							if ( $third_menu_items ) {
+							
+								$html .= '<ul class="third_menu_level" id="third_menu_level_'.$s_parent_id.'">'; // Third level
+								foreach ($third_menu_items as $t_item ){
+									$html .= '<li>';
+
+										$html .= '<div class="third_left">';
+										$html .= _($t_item->description);
+										$html .= '</div>';
+									
+
+										$html .= '<div class="third_right">';
+													$html .= '<a href="'.$t_item->url.'" />'.$t_item->title.'</a>';
+													
+													$t_parent_id = $t_item->ID;
+													$fourth_menu_items = wp_get_nav_menu_items($menu_id);
+													$fourth_menu_items = array_filter($fourth_menu_items, function($fourth_item) use ($t_parent_id) {
+														return $fourth_item->menu_item_parent == $t_parent_id; 
+													});
+													$html .= '<ul class="fourth_menu_level" id="fourth_menu_level_'.$t_parent_id.'">';
+														foreach ($fourth_menu_items as $f_item ){
+															$html .= '<li><a href="'.$f_item->url.'">'.$f_item->title.'</a></li>';
+														}
+													$html .= '</ul>';
+													
+													
+										$html .= '</div>';
+
+
+									$html .= '</li>';
+								}
+
+								$html .= '</ul>';
+							}
+
+						
+
+					$html .= '</li>';
+				}
+				$html .= '</ul>';
+			}
+			
+			
+
+
+		$html .= '</li>';
+	}
+	$html .= '</ul>';
+    //echo $html;
+
+
+   ob_end_clean();
+   return $html;
+}
+
+add_shortcode('level4-menu', 'level4_custom_menu');
+
+
+
+// Add menu item description (supports HTML like <img>)
+add_filter('walker_nav_menu_start_el', function ($item_output, $item, $depth, $args) {
+    if (!empty($item->description)) {
+        $item_output .= '<div class="menu-item-description">' . $item->description . '</div>';
+    }
+    return $item_output;
+}, 10, 4);
+
+
+
+remove_filter( 'nav_menu_description', 'strip_tags' );
+
+function my_plugin_wp_setup_nav_menu_item( $menu_item ) {
+    if ( isset( $menu_item->post_type ) ) {
+        if ( 'nav_menu_item' == $menu_item->post_type ) {
+            $menu_item->description = apply_filters( 'nav_menu_description', $menu_item->post_content );
+        }
+    }
+
+    return $menu_item;
+}
+
+add_filter( 'wp_setup_nav_menu_item', 'my_plugin_wp_setup_nav_menu_item' );
