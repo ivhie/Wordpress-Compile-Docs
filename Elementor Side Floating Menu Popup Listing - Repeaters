@@ -1,0 +1,461 @@
+<?php
+
+/* Style  */
+/*
+add_action( 'elementor/editor/after_enqueue_styles', function() {
+    wp_add_inline_style( 'elementor-editor', '
+        .card_listing_btn .elementor-repeater-row-item-title  {
+            height: 100px !important;
+			display: flex;
+			column-gap:10px;
+			font-weight: 600;
+        }
+
+		 .card_listing_btn .elementor-repeater-row-item-title img  {
+             border:1px solid #333;
+        }
+
+    ' );
+});
+*/
+
+/*Add this on function.php*/
+/* Elementor Widget */
+function register_elementor_custom_extend_widget( $widgets_manager ) {
+    require_once('elementor/widget/side-menu-popup-listing/index.php' );
+    $widgets_manager->register( new \SideFloatingMenuPopupListing() );
+
+}
+add_action( 'elementor/widgets/register', 'register_elementor_custom_extend_widget' );
+
+
+/* Your full widget elementor code*/
+class SideFloatingMenuPopupListing extends \Elementor\Widget_Base {
+
+	public function get_name(): string {
+		return 'side_floating_menu_popup_listing';
+	}
+
+	public function get_title(): string {
+		return esc_html__( 'Side FLoating Menu Popup Listing', 'elementor-addon' );
+	}
+
+	public function get_icon(): string {
+		return 'eicon-post-list';
+	}
+
+	public function get_categories(): array {
+		return [ 'basic' ];
+	}
+
+	public function get_keywords(): array {
+		return [ 'floating-card', 'card' ];
+	}
+
+	protected function register_controls(): void {
+
+		// Content Tab Start
+
+		$this->start_controls_section(
+			'section_title',
+			[
+				'label' => esc_html__( 'Side FLoating Menu Popup Listing', 'elementor-addon' ),
+				'tab' => \Elementor\Controls_Manager::TAB_CONTENT,
+			]
+		);
+
+		
+		$this->add_control(
+			'fm_title',
+			[
+				'label' => esc_html__( 'Title', 'elementor-addon' ),
+				'type' => \Elementor\Controls_Manager::TEXTAREA,
+				'default' => esc_html__( 'Teams We Serve', 'elementor-addon' ),
+
+			]
+		);
+        
+		
+		$this->add_control(
+			'fm_arrow_image',
+			[
+				'label' => esc_html__( 'Arrow Image', 'elementor-addon' ),
+				'type' => \Elementor\Controls_Manager::MEDIA,
+				'show_label' => true,
+				'default' => [ 'url' => get_stylesheet_directory_uri().'/elementor/widget/side-menu-popup-listing/images/expand_circle_right.svg' ] ,
+			]
+		);
+		
+
+
+
+		/* Repeater */
+		$menu_listing = new \Elementor\Repeater();
+       
+		$menu_listing->add_control(
+			'show_menu',
+			[
+				'type' => \Elementor\Controls_Manager::SELECT,
+				'label' => esc_html__( 'Display', 'textdomain' ),
+				'options' => [
+					'default' => esc_html__( 'Default', 'elementor-addon' ),
+					'yes' => esc_html__( 'Yes', 'textdomain' ),
+					'no' => esc_html__( 'No', 'textdomain' ),
+				],
+				'default' => 'yes',
+			]
+		);
+
+		
+    
+		$menu_listing->add_control(
+			'menu_title',
+			[
+				'label' => esc_html__( 'Title Menu', 'elementor-addon' ),
+				'type' => \Elementor\Controls_Manager::TEXT,
+				//'default' => esc_html__( 'Title' , 'elementor-addon' ),
+				'placeholder' => esc_html__( 'Title' , 'elementor-addon' ),
+				'label_block' => true,
+			]
+		);
+
+		 $menu_listing->add_control(
+			'menu_icon',
+			[
+				'label' => esc_html__( 'Icon Menu', 'elementor-addon' ),
+				'type' => \Elementor\Controls_Manager::MEDIA,
+				'show_label' => true,
+				//'default' => [],
+			]
+		);
+
+		
+
+		$menu_listing->add_control(
+			'popup_menu_title',
+			[
+				'label' => esc_html__( 'Pop Up Title', 'elementor-addon' ),
+				'type' => \Elementor\Controls_Manager::TEXT,
+				//'default' => esc_html__( 'Title' , 'elementor-addon' ),
+				'placeholder' => esc_html__( 'Title' , 'elementor-addon' ),
+				'label_block' => true,
+			]
+		);
+
+		$menu_listing->add_control(
+			'popup_description',
+			[
+				'label' => esc_html__( 'Popup Description', 'elementor-addon' ),
+				'type' => \Elementor\Controls_Manager::WYSIWYG,
+				'placeholder' => esc_html__( 'Description' , 'elementor-addon' ),
+				'label_block' => true,
+			]
+		);
+
+		$menu_listing->add_control(
+			'popup_image',
+			[
+				'label' => esc_html__( 'Popup Image', 'elementor-addon' ),
+				'type' => \Elementor\Controls_Manager::MEDIA,
+				'show_label' => true,
+				'default' => [],
+			]
+		);
+
+
+
+		$this->add_control(
+			'floating_menu_listing',
+			[
+				'label' => esc_html__( 'Menu Listing', 'elementor-addon' ),
+				//'classes' => 'card_listing_btn',
+				'type' => \Elementor\Controls_Manager::REPEATER,
+				'fields' => $menu_listing->get_controls(),
+				'default' => [
+
+					[
+						'show_menu' => 'yes',
+						'menu_title' => esc_html__( 'IT Leaders', 'elementor-addon' ),
+						'menu_icon' =>  ['url'=> get_stylesheet_directory_uri().'/elementor/widget/side-menu-popup-listing/images/Vector-1-1.png'],
+						'popup_menu_title' => esc_html__( 'IT Leaders', 'elementor-addon' ),
+						'popup_description' => '',
+						'popup_image' => [],
+					],
+					[
+						'show_menu' => 'yes',
+						'menu_title' => esc_html__( 'Compliance Teams', 'elementor-addon' ),
+						'menu_icon' =>  ['url'=> get_stylesheet_directory_uri().'/elementor/widget/side-menu-popup-listing/images/Frame-422-1-1.png'],
+						'popup_menu_title' => esc_html__( 'Compliance Teams', 'elementor-addon' ),
+						'popup_description' => '',
+						'popup_image' => [],
+					],
+					[
+						'show_menu' => 'yes',
+						'menu_title' => esc_html__( 'Data Center Operators', 'elementor-addon' ),
+						'menu_icon' =>  ['url'=> get_stylesheet_directory_uri().'/elementor/widget/side-menu-popup-listing/images/signal_cellular_alt-1-1.png'],
+						'popup_menu_title' => esc_html__( 'Data Center Operators', 'elementor-addon' ),
+						'popup_description' => '',
+						'popup_image' => [],
+					],
+					[
+						'show_menu' => 'yes',
+						'menu_title' => esc_html__( 'Sustainability Officers', 'elementor-addon' ),
+						'menu_icon' =>  ['url'=> get_stylesheet_directory_uri().'/elementor/widget/side-menu-popup-listing/images/eco-1-1.png'],
+						'popup_menu_title' => esc_html__( 'Sustainability Officers', 'elementor-addon' ),
+						'popup_description' => '',
+						'popup_image' => [],
+					],
+					[
+						'show_menu' => 'yes',
+						'menu_title' => esc_html__( 'Procurement', 'elementor-addon' ),
+						'menu_icon' =>  ['url'=> get_stylesheet_directory_uri().'/elementor/widget/side-menu-popup-listing/images/graph_svgrepo.com_.png'],
+						'popup_menu_title' => esc_html__( 'Procurement', 'elementor-addon' ),
+						'popup_description' => '',
+						'popup_image' => [],
+					],
+					[
+						'show_menu' => 'yes',
+						'menu_title' => esc_html__( 'IT Solutions Providers / Value-Added Resellers', 'elementor-addon' ),
+						'menu_icon' =>  ['url'=> get_stylesheet_directory_uri().'/elementor/widget/side-menu-popup-listing/images/domain.png'],
+						'popup_menu_title' => esc_html__( 'IT Solutions Providers / VARS', 'elementor-addon' ),
+						'popup_description' => '',
+						'popup_image' => [],
+					],
+					[
+						'show_menu' => 'yes',
+						'menu_title' => esc_html__( 'Business Development', 'elementor-addon' ),
+						'menu_icon' =>  ['url'=> get_stylesheet_directory_uri().'/elementor/widget/side-menu-popup-listing/images/enterprise_svgrepo.com-4.png'],
+						'popup_menu_title' => esc_html__( 'Business Development', 'elementor-addon' ),
+						'popup_description' => '',
+						'popup_image' => [],
+					],
+					[
+						'show_menu' => 'yes',
+						'menu_title' => esc_html__( 'County / Municipal Recycling Leaders', 'elementor-addon' ),
+						'menu_icon' =>  ['url'=> get_stylesheet_directory_uri().'/elementor/widget/side-menu-popup-listing/images/things_to_do-2.png'],
+						'popup_menu_title' => esc_html__( 'County / Municipal Recycling Leaders', 'elementor-addon' ),
+						'popup_description' => '',
+						'popup_image' => [],
+					],
+					[
+						'show_menu' => 'yes',
+						'menu_title' => esc_html__( 'Supply Chain Leaders', 'elementor-addon' ),
+						'menu_icon' =>  ['url'=> get_stylesheet_directory_uri().'/elementor/widget/side-menu-popup-listing/images/heap_snapshot_thumbnail.png'],
+						'popup_menu_title' => esc_html__( 'Supply Chain Leaders', 'elementor-addon' ),
+						'popup_description' => '',
+						'popup_image' => [],
+					],
+					
+				],
+				'title_field' => '<img width="100px;" src="{{{ menu_icon.url }}}" alt=""/> {{{ menu_title }}} ',
+			]
+		);
+
+		$this->end_controls_section();
+
+		// Content Tab End
+      
+		// Style Tab End
+
+	}
+
+	protected function render(): void {
+		$settings = $this->get_settings_for_display();
+
+		if ( empty( $settings['floating_menu_listing'] ) ) {
+			return;
+		}
+		?>
+
+		<style>
+			.floating-sidebar { 
+				background: #FFF;
+				box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.25);
+				/*width: 370px;*/
+				display: inline-block;
+				height: 460px;
+				position:relative;
+				
+			}  
+
+			.floating-sidebar a.team_link {
+				padding: 10px 18px 10px 21px;
+				justify-content: space-between;
+				background: #75C043;
+				width:462px;
+				color: #FFF;
+				font-size: 20px;
+				font-style: normal;
+				font-weight: 700;
+				line-height: normal;
+				display:flex;
+				transform: rotate(-0.25turn);
+				position:absolute;
+				left:-209px;
+				top:208px;
+				z-index:4;
+			box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.25);
+			}
+			.floating-sidebar a img {
+				transform: rotate(-0.25turn);
+			}
+			
+			.content-who-we-serve { padding-left:52px;
+				z-index:5;
+				padding-top:30px;
+			
+				position: absolute;
+				top: 0;
+				left: 0%; /* Start to the right of the button */
+				white-space: nowrap;
+				overflow: hidden;
+				width: 0; /* Initially hidden */
+				height: 100%;
+				transition: width 0.2s ease;
+				
+			}  
+			
+			
+			.content-who-we-serve ul {list-style:none;padding:0px; position:relative; }
+
+			.content-who-we-serve ul li a {
+				color:  #000;
+				font-size: 14.804px;
+				font-style: normal;
+				font-weight: 600;
+				line-height: normal;
+				display:flex;
+				align-content: center;
+				align-items:center;
+				column-gap: 15px;
+				margin-bottom:0px;
+				padding: 4px 10px;
+			}
+			.content-who-we-serve ul li:hover {
+				background-color:#F5F7FF; 
+			}
+				
+			.floating-sidebar:hover {
+				width: 500px; 
+				transition: width 0.2s ease;
+			}
+			.floating-sidebar:hover .content-who-we-serve {
+				width: 100%; /* Final expanded width */
+				/*padding: 12px 20px;*/
+				}
+
+			.floating-sidebar:hover  a {
+				box-shadow: 0 0px 0px 0 rgba(0, 0, 0, 0.25);
+				
+			}
+
+			.floating-sidebar:hover a img {
+				transform: rotate(-0.75turn);
+				
+			}
+		</style>
+		
+		<div class="floating-sidebar">
+			<a href="#" class="team_link"><?php echo esc_attr( $settings['fm_title'] ); ?><img src="<?php echo esc_attr( $settings['fm_arrow_image']['url'] ); ?>" alt=""/></a>
+			<div class="content-who-we-serve">
+				<ul>
+                    <?php foreach (  $settings['floating_menu_listing'] as $item ) { ?>
+                       
+						<?php if($item['show_menu'] == 'yes') { ?>
+							<li class="fm_open_card_popup" data-id="<?php echo esc_attr( $item['_id'] ); ?>" id="menu_item_id_<?php echo esc_attr( $item['_id'] ); ?>" data-image_url="<?php echo esc_attr( $item['popup_image']['url'] ); ?>">
+								<a href="#">
+									<img src="<?php echo esc_attr( $item['menu_icon']['url'] ); ?>" alt=""/>
+									<?php echo wp_kses_post( $item['menu_title'] ); ?>
+								</a>
+							</li>
+							<?php } ?>
+					<?php } ?>
+
+					<!--
+				    <li><a href="#industry-roles"><img src="/wp-content/uploads/2025/08/Vector-1-1.png" alt=""/>IT Leaders</a></li>
+					<li><a href="#industry-roles"><img src="/wp-content/uploads/2025/08/Frame-422-1-1.png" alt=""/>Compliance Teams</a></li>
+					<li><a href="#industry-roles"><img src="/wp-content/uploads/2025/08/signal_cellular_alt-1-1.png" alt=""/>Data Center Operators</a></li>
+					<li><a href="#industry-roles"><img src="/wp-content/uploads/2025/08/eco-1-1.png" alt=""/>Sustainability Officers</a> </li>
+					<li><a href="#industry-roles"><img src="/wp-content/uploads/2025/08/graph_svgrepo.com_.png" alt=""/>Procurement</a></li>
+					<li><a href="#industry-roles"><img src="/wp-content/uploads/2025/08/domain.png" alt="" />IT Solutions Providers / Value-Added Resellers</a></li>
+					<li><a href="#industry-roles"><img src="/wp-content/uploads/2025/08/enterprise_svgrepo.com-4.png" alt="" />Business Development</a></li>
+					<li><a href="#industry-roles"><img src="/wp-content/uploads/2025/08/things_to_do-2.png" alt="" />County / Municipal Recycling Leaders</a></li>
+					<li><a href="#industry-roles"><img src="/wp-content/uploads/2025/08/heap_snapshot_thumbnail.png" alt="" />Supply Chain Leaders</a></li>
+					-->
+				</ul>
+			</div>
+		</div>
+		 <?php foreach (  $settings['floating_menu_listing'] as $item ) { ?>
+			<?php if($item['show_menu'] == 'yes') { ?>
+				<div style="display:none;">
+					<h3 id="fm_card_title_<?php echo esc_attr( $item['_id'] ); ?>"><?php echo wp_kses_post( $item['popup_menu_title'] ); ?></h3>
+					<div id="fm_full_description_<?php echo esc_attr( $item['_id'] ); ?>" ><?php echo wp_kses_post( $item['popup_description'] ); ?></div>
+				</div>
+			<?php } ?>
+		<?php } ?>
+
+
+		<script>
+			
+			jQuery(function ($) {
+				// <a class="open-popup" data-popup-id="123">Open</a>
+				jQuery(window).on('elementor/frontend/init', function() {
+					$(document).on('click', '.fm_open_card_popup', function (e) {
+						e.preventDefault();
+						//const id = $(this).data('popup-id'); // Elementor Popup (template) ID
+						//if (window.elementorProFrontend && id) {
+						
+					    if (window.elementorProFrontend) {
+
+						    //jQuery('#title_me').text('tester1');
+							img_url = jQuery(this).data('image_url');
+							//jQuery('#industry_popup_img .attachment-large').attr('src',jQuery(this).data('image_url'));
+							if( img_url != '' ){
+                               jQuery('#industry_popup_img').html('<img width="568" height="469" src="'+img_url+'" class="attachment-large size-large wp-image-1074" alt=""  sizes="(max-width: 568px) 100vw, 568px">');
+							   	//industry_popup
+							} else {
+								//industry_popup
+								jQuery('#w-popup-wrap').css('display', 'none');
+							}
+							
+							jQuery('#industry_popup_title .elementor-heading-title').text(jQuery('#fm_card_title_'+jQuery(this).data('id')).html().replace(/<br\s*\/?>/gi, " "));
+							jQuery("#industry_popup_content").html('');
+                            jQuery("#industry_popup_content").append(jQuery('#fm_full_description_'+jQuery(this).data('id')).html());
+						
+						//elementorProFrontend.modules.popup.show({ id });
+						}
+					});
+				});
+			});
+
+            
+		</script>
+		<?php
+	}
+
+	protected function content_template(): void {
+	   // this would serve as a preview on elementor backend
+		
+		?>
+			<# if ( settings.floating_menu_listing.length ) { #>
+			
+				<div class="floating-sidebar">
+					<a href="#" class="team_link">{{{ settings.fm_title }}}<img src="{{ settings.fm_arrow_image.url }}" alt=""/></a>
+					<div class="content-who-we-serve">
+						<ul>
+							<# _.each( settings.list, function( item ) { #>
+							<li class="fm_open_card_popup" data-id="{{ item._id }}>" id="menu_item_id_{{ item._id }}>" data-image_url="{{ item.popup_image.url }}">
+								<a href="#"><img src="{{ item.menu_icon.url }}" alt=""/>
+									{{{ item.menu_title }}}
+								</a>
+							</li>
+						<# }); #>
+						</ul>
+					</div>
+				</div>
+		<# } #>
+		<?php
+	}
+
+
+}
