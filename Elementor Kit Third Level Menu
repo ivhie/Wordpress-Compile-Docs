@@ -1,0 +1,58 @@
+<style>
+   .grandchild-panel{
+  opacity: 1;
+ visibility: hidden;
+  pointer-events: none;
+  height: 0;
+  overflow: hidden;
+  transition: opacity .0s ease, visibility .0s ease;
+}
+
+.grandchild-panel.active{
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  height: auto;
+  overflow: visible;
+} 
+
+.elementor-editor-active .grandchild-panel { 
+    opacity:1;
+    visibility: visible;
+    pointer-events: auto;
+     height: auto;
+  overflow: visible;
+    
+}
+    
+</style>
+
+<script>
+jQuery(function($){
+
+  // Function to show only the selected panel
+  function showPanel(panelId){
+    $('#stronger-access-submenu, #stronger-crm-submenu, #stronger-ehr-submenu').removeClass('active');
+    $(panelId).addClass('active');
+  }
+
+  // Hover on child items
+  $('#s-access').on('mouseenter', function(){
+    showPanel('#stronger-access-submenu');
+  });
+
+  $('#s-crm').on('mouseenter', function(){
+    showPanel('#stronger-crm-submenu');
+  });
+
+  $('#s-ehr').on('mouseenter', function(){
+    showPanel('#stronger-ehr-submenu');
+  });
+
+  // Hide all panels only when leaving the whole menu wrap
+  $('.menu-wrap').on('mouseleave', function(){
+    $('#stronger-access-submenu, #stronger-crm-submenu, #stronger-ehr-submenu').removeClass('active');
+  });
+
+});
+</script>
