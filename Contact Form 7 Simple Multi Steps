@@ -1,1 +1,344 @@
 
+<style>
+
+
+.product_form_step { display:flex;  column-gap:40px; max-width:1000px; margin:0 auto; justify-content: space-between;     align-items: center;}
+
+.product_form_step2 {  max-width:1000px; margin:0 auto; padding: 30px 0; }
+
+
+
+.product_form_step .left_content {
+max-width:415px; width:100%; }
+
+.product_form_step .right_content {
+max-width:513px; width:100%; }
+
+.product_form_step2 h3,
+.product_form_step h3 {
+	    line-height: 50px;
+  font-size:48px; font-weight:700; 
+}
+
+.product_form_step2 h3 { text-align:center; }
+.product_form_step2 p { max-width:550px; margin:0 auto 27px ; text-align:center; }
+
+.product_form_step2 h3 span,
+.product_form_step h3 span{ color:#535BFF; }
+.product_form_step .right_content label.text {  font-weight: 500; color:#000; margin-bottom:10px; }
+
+.product_form_step .right_content select {
+	border-radius: 3.745px;
+border: 1.248px solid #EFEFEF;
+background-color: #F5F6FA;
+	color:#C6CDD3;
+	font-weight: 500;
+	outline:none;
+}
+.product_form_step2 a.continue,
+.product_form_step .right_content a.continue {
+	color:#fff;
+	border-radius: 5px;
+background-color: #535BFF;
+	padding: 10px 24px;
+	display:block;
+	text-align: center;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.product_form_step .wpcf7-form-control.wpcf7-checkbox { display:flex; flex-wrap: wrap; justify-content:space-between; }
+.product_form_step .wpcf7-form-control.wpcf7-checkbox .wpcf7-list-item { width: 49%;     margin: 0 0 8px; }
+.product_form_step .wpcf7-form-control.wpcf7-checkbox .wpcf7-list-item label { width:100%; }
+
+/* Hide default checkbox */
+.wpcf7-form  .product_form_step input[type="checkbox"] {
+    display: none;
+}
+
+/* Style label as button */
+.wpcf7-form .product_form_step  .wpcf7-list-item-label {
+    display: inline-block;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin: 0px;
+    transition: all 0.3s ease;
+    background: #f5f5f5;
+	  width:100%;
+	border-radius: 8px;
+border: 1px solid #EEECFF;
+background-color: #EEECFF;
+	font-size: 16px;
+	text-align:center;
+	color:#535BFF;
+
+}
+
+/* Hover effect */
+ .wpcf7-form .product_form_step .wpcf7-list-item-label:hover {
+    border-color: #0073aa;
+}
+
+/* Checked state */
+.wpcf7-form  .product_form_step input[type="checkbox"]:checked + .wpcf7-list-item-label {
+  
+	   font-weight: 700;
+    border-color: #535BFF;
+}
+
+.product_form_step.step { display: none; }
+.product_form_step.step.active { display: flex; }
+
+.product_form_step  .wpcf7-not-valid,
+.product_form_step .error {
+  border: 1px solid red !important;
+}
+.product_form_step .wpcf7-not-valid-tip,
+.product_form_step .wpcf7-spinner { display:none; }
+</style>
+
+<script>
+jQuery(function($){
+   // validated steps function
+    function validateStep(step){
+		  let isValid = true;
+
+		  // ✅ TEXT / EMAIL / TEXTAREA
+		  step.find('input, textarea').each(function(){
+			let field = $(this);
+			let type = field.attr('type');
+
+			field.removeClass('error');
+
+			// Skip checkbox here
+			if(type === 'checkbox') return;
+
+			if(field.closest('.wpcf7-form-control').hasClass('required-field')){
+			  let value = field.val().trim();
+
+			  if(!value){
+				field.addClass('error');
+				isValid = false;
+			  }
+
+			  if(type === 'email'){
+				let pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+				if(value && !pattern.test(value)){
+				  field.addClass('error');
+				  isValid = false;
+				}
+			  }
+			}
+		  });
+
+		  // ✅ CHECKBOX GROUP (CF7 style)
+		  step.find('.wpcf7-checkbox.required-field').each(function(){
+			let group = $(this);
+			let checked = group.find('input[type="checkbox"]:checked').length;
+
+			group.removeClass('error');
+
+			if(checked === 0){
+			  group.addClass('error');
+			  isValid = false;
+			}
+		  });
+
+		  return isValid;
+   }
+
+  // next step events 
+  $('.next_step').on('click', function(event){
+    let current = $(this).closest('.step');
+    event.preventDefault(); // Stops the link from following the URL
+    if(validateStep(current)){
+      current.removeClass('active');
+      current.next('.step').addClass('active');
+    } else {
+      //alert('Please fill all required fields correctly.');
+      current.find('.error').first().focus();
+    }
+  });
+  
+  //back steps events
+  $('.back_step').on('click', function(){
+    let current = $(this).closest('.step');
+
+    current.removeClass('active');
+    current.prev('.step').addClass('active');
+  });
+  
+  
+  
+  //this even will show the custom thank you message
+	document.addEventListener('wpcf7mailsent', function(event) {
+
+	  if (event.detail.contactFormId == 5022) { // 👈 your form ID
+		document.getElementById('product_form_step_success_msg').style.display = 'block';
+		 jQuery('.step').removeClass('active');
+		 jQuery('.wpcf7-response-output').css('display','none');
+		 
+		 //change submit button text
+		 //jQuery('.wpcf7-submit').text('Submit');
+		 //jQuery('.wpcf7-submit').prop('disabled', false);
+
+	  }
+
+	}, false);
+
+
+	// make popup modal stay when invalid entries submitted
+	jQuery(document).on('wpcf7invalid', function(event) {
+
+	  if (event.detail.contactFormId == 5022) { // contact form ID of product interest form
+
+		// Stop other scripts (like Elementor) from closing popup
+		event.stopImmediatePropagation();
+
+		// Force popup to stay open
+		let popup = jQuery('.elementor-popup-modal');
+
+		if (!popup.is(':visible')) {
+		     elementorProFrontend.modules.popup.showPopup({ id: 5023}); // popup id of product interest form
+		}
+		
+		 jQuery('.wpcf7-response-output').css('display','none');
+		 
+		 //change submit button text
+		 //jQuery('.wpcf7-submit').text('Submit');
+		 //jQuery('.wpcf7-submit').prop('disabled', false);
+		 
+	  }
+
+	});
+
+
+	jQuery(document).on('elementor/popup/show', function () {
+	  if (typeof wpcf7 !== 'undefined') {
+		document.querySelectorAll('.wpcf7-form').forEach(function(form){
+		  wpcf7.init(form);
+		});
+	  }
+	});
+	
+	
+	// close pop from clicking the close link
+	jQuery(document).on('click', '#close_product_form', function(e){
+	  e.preventDefault();
+
+	  elementorProFrontend.modules.popup.closePopup({
+		id: 5023  // popup id of product interest form
+	  }, e);
+	});
+
+});
+
+jQuery(document).ready(function($){
+
+    var originalText = '';
+
+    // When user clicks submit
+    $('.wpcf7 form').on('submit', function(){
+        var $btn = $(this).find('input.wpcf7-submit');
+
+        if(originalText === ''){
+            originalText = $btn.val(); // store original text once
+        }
+
+        $btn.val('Sending...').prop('disabled', true);
+		 // fallback reset after 3 seconds
+		resetTimer = setTimeout(function () {
+			$btn.val(originalText).prop('disabled', false);
+		}, 2000);
+    });
+
+
+});
+
+
+</script>
+
+
+<div class="step step-1 product_form_step active">
+   <div class="left_content">
+           <h3>Be First. <span>Build Stronger.</span></h3>
+           <p>You description here. </p>
+   </div>
+   <div class="right_content">
+          <div class="form-row two-column">
+                [text* Name class:required-field class:input_name placeholder "Name"]  
+                [text* Phone class:required-field placeholder "Phone"]
+          </div>
+          <div class="form-row one-column"> 
+          [email* Email class:required-field placeholder "Email"]
+          </div>
+          <div class="form-row one-column"> 
+          [text* Why_are_you_interested class:required-field placeholder "Why are you interested?"]
+          </div>
+          <div class="form-row one-column"> 
+          [text* Organization_Type class:required-field placeholder "Organization Type"]
+           </div>
+          <div class="form-row one-column"> 
+          [text* Which_product_are_you_interested_in class:required-field placeholder "Which product are you interested in?"]
+          </div>
+          <div class="form-row one-column"> 
+          [text* Organization_size class:required-field placeholder "Organization Size"]
+          </div>
+          <div class="form-row one-column"> 
+           <a href="#" class="continue next_step">Continue</a>
+          </div>
+   </div>
+</div>
+
+
+<div class="step step-2 product_form_step">
+   <div class="left_content">
+           <h3>What are you most <span>excited about?</span></h3>
+           <p>Select everything that interests you. We'll prioritize your access and tailor your onboarding to what matters most for your agency.</p>
+   </div>
+   <div class="right_content">
+     <div class="form-row one-column"> 
+          [checkbox* What_are_you_most_excited_about class:required-field use_label_element 
+      "Test" 
+      "Test" 
+     
+    ]
+    </div>
+    <div class="form-row one-column"> 
+        <a href="#" class="continue next_step">Continue</a>
+    </div> 
+   </div>
+</div>
+
+<div class="step step-3 product_form_step">
+   <div class="left_content">
+           <h3>Almost there. Help us <span>serve you better.</span></h3>
+           <p>Two minutes now saves hours later. Your answers directly shape how we build and roll out Stronger.</p>
+   </div>
+   <div class="right_content">
+         <div class="form-row one-column"> 
+          <label class="text">What softwware are you currently using?</label>
+          [textarea* What_softwware_are_you_currently_using class:required-field placeholder "e.g. SimplePractice, Kareo, spreadsheets…"]  
+        </div>
+        <div class="form-row one-column"> 
+          <label class="text">What's your biggest frustration with your current setup?</label>
+          [textarea* What_your_biggest_frustration_with_your_current_setup class:required-field placeholder "Tell us what's slowing you down…"]  
+        </div>
+        <div class="form-row one-column"> 
+          <label class="text">When are you looking to make a switch?</label>
+           [select* When_are_you_looking_to_make_a_switch class:required-field "Option 1" "Option 2" "Option 3"]
+        </div>
+        <div class="form-row one-column"> 
+          [submit  class:submit-btn "Submit"]
+        </div>
+          
+   </div>
+</div>
+
+<div  id="product_form_step_success_msg" class="product_form_step_success_msg product_form_step2" style="display:none;">
+     <h3><span>Thanks.</span> Your input is 
+    super valuable.</h3> 
+<p>We look forward to serving you very soon. Don’t worry. We’ll keep you in the loop with updates on when we’re ready to go live!</p>
+<a href="#" class="continue" id="close_product_form">Close</a>
+</div>
